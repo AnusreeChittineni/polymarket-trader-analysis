@@ -1,0 +1,375 @@
+
+================================================================================
+Inspecting folder: C:\Users\anuch\OneDrive\Documents\GitHub\cse-6242-prediction-market-analysis\data\kalshi
+================================================================================
+
+================================================================================
+Inspecting folder: C:\Users\anuch\OneDrive\Documents\GitHub\cse-6242-prediction-market-analysis\data\polymarket
+================================================================================
+
+================================================================================
+Inspecting folder: C:\Users\anuch\OneDrive\Documents\GitHub\cse-6242-prediction-market-analysis\data\kalshi\markets
+================================================================================
+
+ File: markets_0_10000.parquet
+
+Schema:
+  column_name              column_type null  key default extra
+       ticker                  VARCHAR  YES None    None  None
+ event_ticker                  VARCHAR  YES None    None  None
+  market_type                  VARCHAR  YES None    None  None
+        title                  VARCHAR  YES None    None  None
+yes_sub_title                  VARCHAR  YES None    None  None
+ no_sub_title                  VARCHAR  YES None    None  None
+       status                  VARCHAR  YES None    None  None
+      yes_bid                   BIGINT  YES None    None  None
+      yes_ask                   BIGINT  YES None    None  None
+       no_bid                   BIGINT  YES None    None  None
+       no_ask                   BIGINT  YES None    None  None
+   last_price                   BIGINT  YES None    None  None
+       volume                   BIGINT  YES None    None  None
+   volume_24h                   BIGINT  YES None    None  None
+open_interest                   BIGINT  YES None    None  None
+       result                  VARCHAR  YES None    None  None
+ created_time TIMESTAMP WITH TIME ZONE  YES None    None  None
+    open_time TIMESTAMP WITH TIME ZONE  YES None    None  None
+   close_time TIMESTAMP WITH TIME ZONE  YES None    None  None
+  _fetched_at             TIMESTAMP_NS  YES None    None  None
+
+Total rows: 10000
+
+First 5 rows:
+                                                   ticker                                  event_ticker market_type                                                                                                                                                                                                                                                                                                                                                                                                                                      title                                                                                                                                                                                                                                                                                                                                                                                                                              yes_sub_title                                                                                                                                                                                                                                                                                                                                                                                                                               no_sub_title status  yes_bid  yes_ask  no_bid  no_ask  last_price  volume  volume_24h  open_interest result                     created_time                        open_time                close_time                _fetched_at
+KXMVESPORTSMULTIGAMEEXTENDED-S2025791D973FCDE-2F606B5B2AC KXMVESPORTSMULTIGAMEEXTENDED-S2025791D973FCDE      binary yes Donovan Mitchell: 2+,yes Austin Reaves: 2+,yes Ivica Zubac: 10+,yes James Harden: 20+,yes Luka Dončić: 30+,yes Lauri Markkanen: 20+,yes Derrick White: 10+,yes Franz Wagner: 20+,yes Chet Holmgren: 15+,yes LaMelo Ball: 2+,yes James Harden: 2+,yes LeBron James: 2+,yes Lauri Markkanen: 2+,no Toronto wins by over 15.5 Points,no Cleveland wins by over 7.5 Points,no Boston wins by over 13.5 Points,yes Over 218.5 points scored yes Donovan Mitchell: 2+,yes Austin Reaves: 2+,yes Ivica Zubac: 10+,yes James Harden: 20+,yes Luka Dončić: 30+,yes Lauri Markkanen: 20+,yes Derrick White: 10+,yes Franz Wagner: 20+,yes Chet Holmgren: 15+,yes LaMelo Ball: 2+,yes James Harden: 2+,yes LeBron James: 2+,yes Lauri Markkanen: 2+,no Toronto wins by over 15.5 Points,no Cleveland wins by over 7.5 Points,no Boston wins by over 13.5 Points,yes Over 218.5 points scored yes Donovan Mitchell: 2+,yes Austin Reaves: 2+,yes Ivica Zubac: 10+,yes James Harden: 20+,yes Luka Dončić: 30+,yes Lauri Markkanen: 20+,yes Derrick White: 10+,yes Franz Wagner: 20+,yes Chet Holmgren: 15+,yes LaMelo Ball: 2+,yes James Harden: 2+,yes LeBron James: 2+,yes Lauri Markkanen: 2+,no Toronto wins by over 15.5 Points,no Cleveland wins by over 7.5 Points,no Boston wins by over 13.5 Points,yes Over 218.5 points scored active        0        0     100     100           0       0           0              0        2025-11-23 13:51:48.656951-05:00 2025-11-23 13:51:48.622007-05:00 2025-12-07 18:00:00-05:00 2025-11-23 18:51:48.805101
+KXMVESPORTSMULTIGAMEEXTENDED-S202541FEC413CA1-2096B14B5B9 KXMVESPORTSMULTIGAMEEXTENDED-S202541FEC413CA1      binary                                                                                                                                                                       yes Jonathan Taylor,yes Jahmyr Gibbs,yes Derrick Henry,yes Lamar Jackson,yes Patrick Mahomes: 175+,yes Drake Maye: 175+,yes Jared Goff: 175+,yes Sam Darnold: 175+,yes Justin Jefferson: 50+,yes Mark Andrews: 10+,yes Jaxon Smith-Njigba: 80+,yes Jahmyr Gibbs: 60+                                                                                                                                                                       yes Jonathan Taylor,yes Jahmyr Gibbs,yes Derrick Henry,yes Lamar Jackson,yes Patrick Mahomes: 175+,yes Drake Maye: 175+,yes Jared Goff: 175+,yes Sam Darnold: 175+,yes Justin Jefferson: 50+,yes Mark Andrews: 10+,yes Jaxon Smith-Njigba: 80+,yes Jahmyr Gibbs: 60+                                                                                                                                                                       yes Jonathan Taylor,yes Jahmyr Gibbs,yes Derrick Henry,yes Lamar Jackson,yes Patrick Mahomes: 175+,yes Drake Maye: 175+,yes Jared Goff: 175+,yes Sam Darnold: 175+,yes Justin Jefferson: 50+,yes Mark Andrews: 10+,yes Jaxon Smith-Njigba: 80+,yes Jahmyr Gibbs: 60+ active        0        0     100     100           0       0           0              0        2025-11-23 13:51:48.216182-05:00 2025-11-23 13:51:48.177164-05:00 2025-12-07 13:00:00-05:00 2025-11-23 18:51:48.805101
+KXMVESPORTSMULTIGAMEEXTENDED-S2025AF0C3DAAC7F-F3FFAA838E2 KXMVESPORTSMULTIGAMEEXTENDED-S2025AF0C3DAAC7F      binary                                                                                                                                                                                                                                                                                                                                        yes Baker Mayfield,yes Rachaad White,yes Los Angeles R,yes Emeka Egbuka: 50+,yes Rachaad White: 10+                                                                                                                                                                                                                                                                                                                                        yes Baker Mayfield,yes Rachaad White,yes Los Angeles R,yes Emeka Egbuka: 50+,yes Rachaad White: 10+                                                                                                                                                                                                                                                                                                                                        yes Baker Mayfield,yes Rachaad White,yes Los Angeles R,yes Emeka Egbuka: 50+,yes Rachaad White: 10+ active        0        0     100     100           0       0           0              0        2025-11-23 13:51:47.098530-05:00 2025-11-23 13:51:47.066584-05:00 2025-12-07 20:20:00-05:00 2025-11-23 18:51:48.805101
+KXMVESPORTSMULTIGAMEEXTENDED-S202559827ED1152-E13C468F582 KXMVESPORTSMULTIGAMEEXTENDED-S202559827ED1152      binary                                                                                                                                                                                                                                                                                                     yes Indianapolis,yes Green Bay,yes Cincinnati,yes Detroit,yes Baltimore,yes Pittsburgh,yes Seattle,yes Los Angeles R,yes San Francisco                                                                                                                                                                                                                                                                                                     yes Indianapolis,yes Green Bay,yes Cincinnati,yes Detroit,yes Baltimore,yes Pittsburgh,yes Seattle,yes Los Angeles R,yes San Francisco                                                                                                                                                                                                                                                                                                     yes Indianapolis,yes Green Bay,yes Cincinnati,yes Detroit,yes Baltimore,yes Pittsburgh,yes Seattle,yes Los Angeles R,yes San Francisco active        0        0     100     100           0       0           0              0        2025-11-23 13:51:47.025844-05:00 2025-11-23 13:51:46.970317-05:00 2025-12-07 13:00:00-05:00 2025-11-23 18:51:48.805101
+KXMVESPORTSMULTIGAMEEXTENDED-S20252F848F1C785-3FC745B6CA8 KXMVESPORTSMULTIGAMEEXTENDED-S20252F848F1C785      binary                                                                                                                                                                                                                                                                                                                                                                                        yes George Kittle: 40+,yes Christian McCaffrey: 70+                                                                                                                                                                                                                                                                                                                                                                                        yes George Kittle: 40+,yes Christian McCaffrey: 70+                                                                                                                                                                                                                                                                                                                                                                                        yes George Kittle: 40+,yes Christian McCaffrey: 70+ active        0        0     100     100           0       0           0              0        2025-11-23 13:51:47.016141-05:00 2025-11-23 13:51:46.963903-05:00 2025-12-08 20:15:00-05:00 2025-11-23 18:51:48.805101
+
+ File: markets_1000000_1010000.parquet
+
+Schema:
+  column_name              column_type null  key default extra
+       ticker                  VARCHAR  YES None    None  None
+ event_ticker                  VARCHAR  YES None    None  None
+  market_type                  VARCHAR  YES None    None  None
+        title                  VARCHAR  YES None    None  None
+yes_sub_title                  VARCHAR  YES None    None  None
+ no_sub_title                  VARCHAR  YES None    None  None
+       status                  VARCHAR  YES None    None  None
+      yes_bid                   BIGINT  YES None    None  None
+      yes_ask                   BIGINT  YES None    None  None
+       no_bid                   BIGINT  YES None    None  None
+       no_ask                   BIGINT  YES None    None  None
+   last_price                   BIGINT  YES None    None  None
+       volume                   BIGINT  YES None    None  None
+   volume_24h                   BIGINT  YES None    None  None
+open_interest                   BIGINT  YES None    None  None
+       result                  VARCHAR  YES None    None  None
+ created_time TIMESTAMP WITH TIME ZONE  YES None    None  None
+    open_time TIMESTAMP WITH TIME ZONE  YES None    None  None
+   close_time TIMESTAMP WITH TIME ZONE  YES None    None  None
+  _fetched_at             TIMESTAMP_NS  YES None    None  None
+
+Total rows: 10000
+
+First 5 rows:
+                                                ticker                               event_ticker market_type                                                                                                                                                                                                                                                                                                                                                                   title                                                                                                                                                                                                                                                                                                                                                           yes_sub_title                                                                                                                                                                                                                                                                                                                                                            no_sub_title    status  yes_bid  yes_ask  no_bid  no_ask  last_price  volume  volume_24h  open_interest result                     created_time                        open_time                       close_time                _fetched_at
+       KXMVENFLSINGLEGAME-S202543B4D5333C8-51BC3BD94E3        KXMVENFLSINGLEGAME-S202543B4D5333C8      binary                                                                                                                                                                                                                                                                                                                    yes Jameis Winston: 224+,yes Over 37.5 points scored                                                                                                                                                                                                                                                                                                                    yes Jameis Winston: 224+,yes Over 37.5 points scored                                                                                                                                                                                                                                                                                                                    yes Jameis Winston: 224+,yes Over 37.5 points scored finalized        0        0     100     100           0       0           0              0     no 2025-11-16 12:53:40.359061-05:00 2025-11-16 12:53:34.515630-05:00 2025-11-16 17:40:45.488780-05:00 2025-11-23 19:07:44.710768
+KXMVENFLMULTIGAMEEXTENDED-S20252AB88F5C359-915E20D7059 KXMVENFLMULTIGAMEEXTENDED-S20252AB88F5C359      binary                                                                                                                                                                                                                                                                                                    yes Jameis Winston: 200+,yes DK Metcalf: 60+,yes Bijan Robinson: 75+                                                                                                                                                                                                                                                                                                    yes Jameis Winston: 200+,yes DK Metcalf: 60+,yes Bijan Robinson: 75+                                                                                                                                                                                                                                                                                                    yes Jameis Winston: 200+,yes DK Metcalf: 60+,yes Bijan Robinson: 75+ finalized        0        0     100     100           0       0           0              0     no 2025-11-16 12:53:40.332575-05:00 2025-11-16 12:53:34.402899-05:00 2025-11-17 05:35:05.120127-05:00 2025-11-23 19:07:44.710768
+KXMVENFLMULTIGAMEEXTENDED-S20258F60C430B89-F0486EAA2B1 KXMVENFLMULTIGAMEEXTENDED-S20258F60C430B89      binary yes Baltimore,yes Green Bay,yes Kansas City,yes Los Angeles C,yes Seattle,yes San Francisco,yes Buffalo,yes Lamar Jackson: 175+,yes Caleb Williams: 175+,yes Joe Flacco: 175+,yes Aaron Rodgers: 175+,yes Jared Goff: 175+,yes Jalen Hurts: 175+,yes Jordan Love: 175+,yes Patrick Mahomes: 175+,yes Justin Herbert: 175+,yes Josh Allen: 175+,yes Baker Mayfield: 175+ yes Baltimore,yes Green Bay,yes Kansas City,yes Los Angeles C,yes Seattle,yes San Francisco,yes Buffalo,yes Lamar Jackson: 175+,yes Caleb Williams: 175+,yes Joe Flacco: 175+,yes Aaron Rodgers: 175+,yes Jared Goff: 175+,yes Jalen Hurts: 175+,yes Jordan Love: 175+,yes Patrick Mahomes: 175+,yes Justin Herbert: 175+,yes Josh Allen: 175+,yes Baker Mayfield: 175+ yes Baltimore,yes Green Bay,yes Kansas City,yes Los Angeles C,yes Seattle,yes San Francisco,yes Buffalo,yes Lamar Jackson: 175+,yes Caleb Williams: 175+,yes Joe Flacco: 175+,yes Aaron Rodgers: 175+,yes Jared Goff: 175+,yes Jalen Hurts: 175+,yes Jordan Love: 175+,yes Patrick Mahomes: 175+,yes Justin Herbert: 175+,yes Josh Allen: 175+,yes Baker Mayfield: 175+ finalized        0        0     100     100           0       0           0              0     no 2025-11-16 12:53:40.306038-05:00 2025-11-16 12:53:34.440616-05:00 2025-11-17 02:49:32.075247-05:00 2025-11-23 19:07:44.710768
+KXMVENFLMULTIGAMEEXTENDED-S2025B168C5B9C3A-9BF4D2D65CE KXMVENFLMULTIGAMEEXTENDED-S2025B168C5B9C3A      binary                                                                                                                                                                                                                                                                                                      yes Atlanta,yes Green Bay,no Los Angeles R wins by over 3.5 points                                                                                                                                                                                                                                                                                                      yes Atlanta,yes Green Bay,no Los Angeles R wins by over 3.5 points                                                                                                                                                                                                                                                                                                      yes Atlanta,yes Green Bay,no Los Angeles R wins by over 3.5 points finalized        0        0     100     100           0       0           0              0     no 2025-11-16 12:53:40.207311-05:00 2025-11-16 12:53:34.186416-05:00 2025-11-17 04:15:41.919120-05:00 2025-11-23 19:07:44.710768
+KXMVENFLMULTIGAMEEXTENDED-S2025175C60C7320-733CBB77A26 KXMVENFLMULTIGAMEEXTENDED-S2025175C60C7320      binary                                                                                                                                                                                                                 yes Baltimore,yes Atlanta,yes Pittsburgh,yes Green Bay,yes Aaron Rodgers: 175+,yes Bijan Robinson: 60+,yes Javonte Williams: 60+,yes Ashton Jeanty: 50+                                                                                                                                                                                                                 yes Baltimore,yes Atlanta,yes Pittsburgh,yes Green Bay,yes Aaron Rodgers: 175+,yes Bijan Robinson: 60+,yes Javonte Williams: 60+,yes Ashton Jeanty: 50+                                                                                                                                                                                                                 yes Baltimore,yes Atlanta,yes Pittsburgh,yes Green Bay,yes Aaron Rodgers: 175+,yes Bijan Robinson: 60+,yes Javonte Williams: 60+,yes Ashton Jeanty: 50+ finalized        0        0     100     100           0       0           0              0     no 2025-11-16 12:53:40.149777-05:00 2025-11-16 12:53:34.209418-05:00 2025-11-17 02:27:56.057599-05:00 2025-11-23 19:07:44.710768
+
+ File: markets_100000_110000.parquet
+
+Schema:
+  column_name              column_type null  key default extra
+       ticker                  VARCHAR  YES None    None  None
+ event_ticker                  VARCHAR  YES None    None  None
+  market_type                  VARCHAR  YES None    None  None
+        title                  VARCHAR  YES None    None  None
+yes_sub_title                  VARCHAR  YES None    None  None
+ no_sub_title                  VARCHAR  YES None    None  None
+       status                  VARCHAR  YES None    None  None
+      yes_bid                   BIGINT  YES None    None  None
+      yes_ask                   BIGINT  YES None    None  None
+       no_bid                   BIGINT  YES None    None  None
+       no_ask                   BIGINT  YES None    None  None
+   last_price                   BIGINT  YES None    None  None
+       volume                   BIGINT  YES None    None  None
+   volume_24h                   BIGINT  YES None    None  None
+open_interest                   BIGINT  YES None    None  None
+       result                  VARCHAR  YES None    None  None
+ created_time TIMESTAMP WITH TIME ZONE  YES None    None  None
+    open_time TIMESTAMP WITH TIME ZONE  YES None    None  None
+   close_time TIMESTAMP WITH TIME ZONE  YES None    None  None
+  _fetched_at             TIMESTAMP_NS  YES None    None  None
+
+Total rows: 10000
+
+First 5 rows:
+                                                   ticker                                  event_ticker market_type                                                                                                                                                      title                                                                                                                                              yes_sub_title                                                                                                                                               no_sub_title status  yes_bid  yes_ask  no_bid  no_ask  last_price  volume  volume_24h  open_interest result                     created_time                        open_time                close_time                _fetched_at
+KXMVESPORTSMULTIGAMEEXTENDED-S20253FB8B7DF8C3-C0B04D397D6 KXMVESPORTSMULTIGAMEEXTENDED-S20253FB8B7DF8C3      binary                                                                                            yes Drake Maye: 225+,yes Tee Higgins: 50+,yes Stefon Diggs: 60+                                                                                            yes Drake Maye: 225+,yes Tee Higgins: 50+,yes Stefon Diggs: 60+                                                                                            yes Drake Maye: 225+,yes Tee Higgins: 50+,yes Stefon Diggs: 60+ active        0        0     100     100           0       0           0              0        2025-11-23 09:21:50.070986-05:00 2025-11-23 09:21:50.034856-05:00 2025-12-07 13:00:00-05:00 2025-11-23 18:52:48.690709
+KXMVESPORTSMULTIGAMEEXTENDED-S20253DF7791CBB8-4E7E56D2DDF KXMVESPORTSMULTIGAMEEXTENDED-S20253DF7791CBB8      binary                         yes TreVeyon Henderson,yes New England,yes Drake Maye: 175+,yes Stefon Diggs: 60+,yes Chase Brown: 50+,yes TreVeyon Henderson: 50+                         yes TreVeyon Henderson,yes New England,yes Drake Maye: 175+,yes Stefon Diggs: 60+,yes Chase Brown: 50+,yes TreVeyon Henderson: 50+                         yes TreVeyon Henderson,yes New England,yes Drake Maye: 175+,yes Stefon Diggs: 60+,yes Chase Brown: 50+,yes TreVeyon Henderson: 50+ active        0        0     100     100           0       0           0              0        2025-11-23 09:21:49.917589-05:00 2025-11-23 09:21:49.884932-05:00 2025-12-07 13:00:00-05:00 2025-11-23 18:52:48.690709
+KXMVESPORTSMULTIGAMEEXTENDED-S2025FA7E0E2E55F-D0BEFB61AB3 KXMVESPORTSMULTIGAMEEXTENDED-S2025FA7E0E2E55F      binary yes Drake Maye: 200+,yes Hunter Henry: 3+,yes Jaxon Smith-Njigba: 6+,yes Chase Brown: 50+,yes TreVeyon Henderson: 50+,yes Seattle wins by over 10.5 points yes Drake Maye: 200+,yes Hunter Henry: 3+,yes Jaxon Smith-Njigba: 6+,yes Chase Brown: 50+,yes TreVeyon Henderson: 50+,yes Seattle wins by over 10.5 points yes Drake Maye: 200+,yes Hunter Henry: 3+,yes Jaxon Smith-Njigba: 6+,yes Chase Brown: 50+,yes TreVeyon Henderson: 50+,yes Seattle wins by over 10.5 points active        0        0     100     100           0       0           0              0        2025-11-23 09:21:49.763583-05:00 2025-11-23 09:21:49.718256-05:00 2025-12-07 13:00:00-05:00 2025-11-23 18:52:48.690709
+KXMVESPORTSMULTIGAMEEXTENDED-S20252AD3B12DE78-41219048B44 KXMVESPORTSMULTIGAMEEXTENDED-S20252AD3B12DE78      binary                                                                                                   yes Quinshon Judkins,yes Jakobi Meyers,yes Jaylen Warren                                                                                                   yes Quinshon Judkins,yes Jakobi Meyers,yes Jaylen Warren                                                                                                   yes Quinshon Judkins,yes Jakobi Meyers,yes Jaylen Warren active        0        0     100     100           0       0           0              0        2025-11-23 09:21:49.680904-05:00 2025-11-23 09:21:49.648498-05:00 2025-12-07 16:05:00-05:00 2025-11-23 18:52:48.690709
+          KXMVENFLSINGLEGAME-S202569B16A56097-3546D5C3AFA           KXMVENFLSINGLEGAME-S202569B16A56097      binary                                                        yes Stefon Diggs,yes Drake Maye: 200+,yes Hunter Henry: 20+,yes New England wins by over 9.5 points                                                        yes Stefon Diggs,yes Drake Maye: 200+,yes Hunter Henry: 20+,yes New England wins by over 9.5 points                                                        yes Stefon Diggs,yes Drake Maye: 200+,yes Hunter Henry: 20+,yes New England wins by over 9.5 points active        0        0     100     100           0       0           0              0        2025-11-23 09:21:49.601726-05:00 2025-11-23 09:21:49.558134-05:00 2025-12-07 13:00:00-05:00 2025-11-23 18:52:48.690709
+
+================================================================================
+Inspecting folder: C:\Users\anuch\OneDrive\Documents\GitHub\cse-6242-prediction-market-analysis\data\kalshi\trades
+================================================================================
+
+ File: trades_0_10000.parquet
+
+Schema:
+ column_name              column_type null  key default extra
+    trade_id                  VARCHAR  YES None    None  None
+      ticker                  VARCHAR  YES None    None  None
+       count                   BIGINT  YES None    None  None
+   yes_price                   BIGINT  YES None    None  None
+    no_price                   BIGINT  YES None    None  None
+  taker_side                  VARCHAR  YES None    None  None
+created_time TIMESTAMP WITH TIME ZONE  YES None    None  None
+ _fetched_at             TIMESTAMP_NS  YES None    None  None
+
+Total rows: 10000
+
+First 5 rows:
+                            trade_id    ticker  count  yes_price  no_price taker_side                     created_time                _fetched_at
+5df4ade0-f927-461a-8bc0-d7e23b2cc038 -23MAR-T2     10          1        99        yes 2023-03-27 19:27:26.539290-04:00 2025-11-25 01:20:41.474248
+1168cd56-9895-470d-83ab-d6673f821f75 -23MAR-T2     10          1        99        yes 2023-03-27 19:27:18.168809-04:00 2025-11-25 01:20:41.474248
+121d116c-ce75-4e9e-8e08-965f6094e62e -23MAR-T2     10          1        99        yes 2023-03-27 19:27:09.413934-04:00 2025-11-25 01:20:41.474248
+f3c052d1-bd82-4284-9b23-77d97d8125f0 -23MAR-T2     10          1        99        yes 2023-03-27 19:27:01.219108-04:00 2025-11-25 01:20:41.474248
+f6b42645-bb32-40a1-b5e9-ae1ba414323f -23MAR-T2     10          1        99        yes 2023-03-27 19:27:01.209590-04:00 2025-11-25 01:20:41.474248
+
+ File: trades_10000000_10010000.parquet
+
+Schema:
+ column_name              column_type null  key default extra
+    trade_id                  VARCHAR  YES None    None  None
+      ticker                  VARCHAR  YES None    None  None
+       count                   BIGINT  YES None    None  None
+   yes_price                   BIGINT  YES None    None  None
+    no_price                   BIGINT  YES None    None  None
+  taker_side                  VARCHAR  YES None    None  None
+created_time TIMESTAMP WITH TIME ZONE  YES None    None  None
+ _fetched_at             TIMESTAMP_NS  YES None    None  None
+
+Total rows: 10000
+
+First 5 rows:
+                            trade_id                      ticker  count  yes_price  no_price taker_side                     created_time                _fetched_at
+d590b9f2-e8b4-467e-a9f4-b08d8b80147a KXBTCD-25MAY1121-T104499.99     50         94         6        yes 2025-05-11 20:55:50.108090-04:00 2025-11-25 03:07:00.359438
+4c4e475d-ee7f-4877-8f16-99df7c6f2666 KXBTCD-25MAY1121-T104499.99    506         93         7        yes 2025-05-11 20:55:34.986364-04:00 2025-11-25 03:07:00.359438
+ffc0e3c0-9311-4808-8839-3b566a262a36 KXBTCD-25MAY1121-T104499.99     50         89        11         no 2025-05-11 20:55:14.041536-04:00 2025-11-25 03:07:00.359438
+83ef1ca9-009a-4304-a96a-689024812511 KXBTCD-25MAY1121-T104499.99      5         91         9        yes 2025-05-11 20:55:13.973242-04:00 2025-11-25 03:07:00.359438
+3fd2904b-e9bd-4054-9719-553de735b954 KXBTCD-25MAY1121-T104499.99     11         91         9        yes 2025-05-11 20:55:12.469769-04:00 2025-11-25 03:07:00.359438
+
+ File: trades_1000000_1010000.parquet
+
+Schema:
+ column_name              column_type null  key default extra
+    trade_id                  VARCHAR  YES None    None  None
+      ticker                  VARCHAR  YES None    None  None
+       count                   BIGINT  YES None    None  None
+   yes_price                   BIGINT  YES None    None  None
+    no_price                   BIGINT  YES None    None  None
+  taker_side                  VARCHAR  YES None    None  None
+created_time TIMESTAMP WITH TIME ZONE  YES None    None  None
+ _fetched_at             TIMESTAMP_NS  YES None    None  None
+
+Total rows: 10000
+
+First 5 rows:
+                            trade_id            ticker  count  yes_price  no_price taker_side                     created_time                _fetched_at
+7d7e30d3-dd84-4ff9-bea6-fbbd7fcaa76a GAS-23MAR20-T3.55     30         11        89        yes 2023-03-15 13:57:53.309021-04:00 2025-11-25 01:34:01.651773
+445126e9-8c27-4207-a7fb-f36ab3fc49ac GAS-23MAR20-T3.55      5         12        88        yes 2023-03-15 13:57:53.309021-04:00 2025-11-25 01:34:01.651773
+8e88740c-5221-4f44-b26c-12bdc356b0a0 GAS-23MAR20-T3.55     35          7        93        yes 2023-03-15 13:57:53.296655-04:00 2025-11-25 01:34:01.651773
+859a213b-fbf1-4932-a6af-9fd7d9c2e9e9 GAS-23MAR20-T3.55     15          6        94        yes 2023-03-15 13:57:53.296655-04:00 2025-11-25 01:34:01.651773
+2e9113b5-a4f2-4414-8ec3-655fe639a631 GAS-23MAR20-T3.55     25          6        94        yes 2023-03-15 13:57:53.283359-04:00 2025-11-25 01:34:01.651773
+
+================================================================================
+Inspecting folder: C:\Users\anuch\OneDrive\Documents\GitHub\cse-6242-prediction-market-analysis\data\polymarket\markets
+================================================================================
+
+ File: markets_0_10000.parquet
+
+Schema:
+         column_name              column_type null  key default extra
+                  id                  VARCHAR  YES None    None  None
+        condition_id                  VARCHAR  YES None    None  None
+            question                  VARCHAR  YES None    None  None
+                slug                  VARCHAR  YES None    None  None
+            outcomes                  VARCHAR  YES None    None  None
+      outcome_prices                  VARCHAR  YES None    None  None
+      clob_token_ids                  VARCHAR  YES None    None  None
+              volume                   DOUBLE  YES None    None  None
+           liquidity                   DOUBLE  YES None    None  None
+              active                  BOOLEAN  YES None    None  None
+              closed                  BOOLEAN  YES None    None  None
+            end_date TIMESTAMP WITH TIME ZONE  YES None    None  None
+          created_at TIMESTAMP WITH TIME ZONE  YES None    None  None
+market_maker_address                  VARCHAR  YES None    None  None
+         _fetched_at             TIMESTAMP_NS  YES None    None  None
+
+Total rows: 10000
+
+First 5 rows:
+id                                                       condition_id                                                            question                                                              slug      outcomes                                                                        outcome_prices                                                                                                                                                     clob_token_ids        volume  liquidity  active  closed                  end_date                       created_at                       market_maker_address                _fetched_at
+12 0xe3b423dfad8c22ff75c9899c4e8176f628cf4ad4caa00481764d320e7415f7a9                 Will Joe Biden get Coronavirus before the election?                will-joe-biden-get-coronavirus-before-the-election ["Yes", "No"]                                                                            ["0", "0"] ["53135072462907880191400140706440867753044989936304433583131786753949599718775", "60869871469376321574904667328762911501870754872924453995477779862968218702336"]  32257.445115   0.000000    True    True 2020-11-03 19:00:00-05:00 2020-10-02 12:10:01.467000-04:00 0x8BD6C3D7a57D650A1870dd338234f90051fe9918 2026-02-03 22:24:36.935776
+17 0x44f10d1cd5aaed4b7ae0b5edb76790f54f45dc0bcaa86831c83d865c774fbb90              Will Airbnb begin publicly trading before Jan 1, 2021?              will-airbnb-begin-publicly-trading-before-jan-1-2021 ["Yes", "No"]                                                                            ["0", "0"] ["23957885615115430922384185661294483989521212430808224513177413172438775950057", "44065917169138815451032058926556960033374557137879250075091545322436931840853"]  89665.252158   0.000000    True    True 2021-01-01 19:00:00-05:00 2020-10-02 15:20:04.234000-04:00 0x3d3dB3BeE80414717e3C66c341EF95eCc9BDDBaB 2026-02-03 22:24:36.935776
+18 0x3e0524de013d9dc359f5eb370773f25de2f03d3200294cfd0fa7dac2f399d101 Will a new Supreme Court Justice be confirmed before Nov 3rd, 2020? will-a-new-supreme-court-justice-be-confirmed-before-nov-3rd-2020 ["Yes", "No"]                                                                            ["0", "0"]  ["7192973530925903015287004813226256961086727269646918334118953338356315960259", "16847315704461293231139078524698349110433698045131366205472540524863290566139"]  43279.456005   0.000000    True    True 2020-11-03 19:00:00-05:00 2020-10-02 15:20:04.234000-04:00 0x01a4333b6aCb5091cF0219646f35E289546F4656 2026-02-03 22:24:36.935776
+19 0x9b946f54f3428aafc308c33aa04a943fe13a011bdac9a9b66e1ba16c416ca256      Will Kim Kardashian and Kanye West divorce before Jan 1, 2021?      will-kim-kardashian-and-kanye-west-divorce-before-jan-1-2021 ["Yes", "No"] ["0.000001011082052522541417308141468657552", "0.9999989889179474774585826918585313"]  ["4485468797843270805361907688585033105060134197906764657766452761383944608702", "99620935296034450526138833612193162137893979576079468831519296537203486531810"]  22067.475119   0.179651    True    True 2021-01-01 19:00:00-05:00 2020-10-02 15:20:04.234000-04:00 0x13064324dFF1e76062975345d255EFccc6C78bd0 2026-02-03 22:24:36.935776
+20 0x5d1a1ab716fd06943441fe27cde0089651ce769bec55e191b6953468a0e9f0d0            Will Coinbase begin publicly trading before Jan 1, 2021?            will-coinbase-begin-publicly-trading-before-jan-1-2021 ["Yes", "No"] ["0.000001024519509568169644816863666886675", "0.9999989754804904318303551831363331"] ["36272374199536229966445059644094050673269921351760158331280706670625385054221", "29551507732179460087505547206009697311109043686065631717734195665429037695993"] 116803.377183   0.367501    True    True 2021-01-01 19:00:00-05:00 2020-10-02 15:20:04.249000-04:00 0x4d96190E8D0487d019987Cd9dF34dD51f617037F 2026-02-03 22:24:36.935776
+
+ File: markets_100000_110000.parquet
+
+Schema:
+         column_name              column_type null  key default extra
+                  id                  VARCHAR  YES None    None  None
+        condition_id                  VARCHAR  YES None    None  None
+            question                  VARCHAR  YES None    None  None
+                slug                  VARCHAR  YES None    None  None
+            outcomes                  VARCHAR  YES None    None  None
+      outcome_prices                  VARCHAR  YES None    None  None
+      clob_token_ids                  VARCHAR  YES None    None  None
+              volume                   DOUBLE  YES None    None  None
+           liquidity                   DOUBLE  YES None    None  None
+              active                  BOOLEAN  YES None    None  None
+              closed                  BOOLEAN  YES None    None  None
+            end_date TIMESTAMP WITH TIME ZONE  YES None    None  None
+          created_at TIMESTAMP WITH TIME ZONE  YES None    None  None
+market_maker_address                  VARCHAR  YES None    None  None
+         _fetched_at             TIMESTAMP_NS  YES None    None  None
+
+Total rows: 10000
+
+First 5 rows:
+    id                                                       condition_id                                               question                                    slug       outcomes outcome_prices                                                                                                                                                      clob_token_ids        volume  liquidity  active  closed                  end_date                       created_at market_maker_address                _fetched_at
+604068 0x137b05d71083e8851fb6902f60b762d2f282d8e211dfffd2b29cf21574c03a0c              Bitcoin Up or Down - September 21, 8AM ET  bitcoin-up-or-down-september-21-8am-et ["Up", "Down"]     ["1", "0"] ["108997410337034507780045817948232035842877709014425445570957229529076941500946", "79546961732697642952381947143909791328028942876871299277336651021487987580582"]  37351.212844        0.0    True    True 2025-09-21 09:00:00-04:00 2025-09-19 08:00:00.337507-04:00                      2026-02-03 22:26:18.011708
+604069 0x889fa8ce6b90dba5f2451443ecbb53285e9fccd5cab5b91f4944bf7fa343ba6d             Ethereum Up or Down - September 21, 8AM ET ethereum-up-or-down-september-21-8am-et ["Up", "Down"]     ["1", "0"] ["115516919378029095299454596649630269064916817422202904187613655326376032025268", "44995530202010600689301172774020512318623738527063295623028624614422877492882"]  30060.942414        0.0    True    True 2025-09-21 09:00:00-04:00 2025-09-19 08:00:00.693415-04:00                      2026-02-03 22:26:18.011708
+604070 0x691f12a5aeb248454989342a5882a16aabd83e4871bd35c19150a718e0634533               Solana Up or Down - September 21, 8AM ET   solana-up-or-down-september-21-8am-et ["Up", "Down"]     ["1", "0"]  ["100070450161163968524493713602458054188836507130651739171380773291078276220318", "6961550438804444057712197349973601151840065250726068674861727517156195061207"] 110607.343142        0.0    True    True 2025-09-21 09:00:00-04:00 2025-09-19 08:00:01.043571-04:00                      2026-02-03 22:26:18.011708
+604071 0x9bd48f43ed493f865519f664dec0d50034c7e732175d5c28dc194dad82fc0785                  XRP Up or Down - September 21, 8AM ET      xrp-up-or-down-september-21-8am-et ["Up", "Down"]     ["1", "0"] ["87169829322909661014759338485785971894469545362382497618590617780003423463948", "111200097144374688034087656230235873880681807170123205358881458201664323246768"]  34893.874203        0.0    True    True 2025-09-21 09:00:00-04:00                              NaT                      2026-02-03 22:26:18.011708
+604072 0x3b9b772279d1ff57fba047eab03223fb2042c1e01209c8ad11ce13b141c33c29 Ethereum Up or Down - September 19, 11:00AM-11:15AM ET           eth-up-or-down-15m-1758294000 ["Up", "Down"]     ["0", "1"]  ["95991858621385885594304656633198614420077253651294910865507552724486366620249", "44104923769425695330031639823277483448454946907962224048006587586758714707259"]  14433.956272        0.0    True    True 2025-09-19 11:15:00-04:00 2025-09-19 08:01:48.433006-04:00                      2026-02-03 22:26:18.011708
+
+ File: markets_10000_20000.parquet
+
+Schema:
+         column_name              column_type null  key default extra
+                  id                  VARCHAR  YES None    None  None
+        condition_id                  VARCHAR  YES None    None  None
+            question                  VARCHAR  YES None    None  None
+                slug                  VARCHAR  YES None    None  None
+            outcomes                  VARCHAR  YES None    None  None
+      outcome_prices                  VARCHAR  YES None    None  None
+      clob_token_ids                  VARCHAR  YES None    None  None
+              volume                   DOUBLE  YES None    None  None
+           liquidity                   DOUBLE  YES None    None  None
+              active                  BOOLEAN  YES None    None  None
+              closed                  BOOLEAN  YES None    None  None
+            end_date TIMESTAMP WITH TIME ZONE  YES None    None  None
+          created_at TIMESTAMP WITH TIME ZONE  YES None    None  None
+market_maker_address                  VARCHAR  YES None    None  None
+         _fetched_at             TIMESTAMP_NS  YES None    None  None
+
+Total rows: 10000
+
+First 5 rows:
+    id                                                       condition_id                                        question                                         slug      outcomes outcome_prices                                                                                                                                                      clob_token_ids       volume  liquidity  active  closed                  end_date                       created_at                       market_maker_address                _fetched_at
+255333 0x0fae1cd8cf19f2e0480edea0fb4b67ea1496baec066ca2c125b93015120f4da5 Will X remove likes + reposts counter in March? will-x-remove-likes-reposts-counter-in-march ["Yes", "No"]     ["0", "1"]  ["39050296324364445809641664684679872936491115626778324924525327416420800978175", "89653695069359541980362576745906162289788383968359861266833283134215457248801"] 1.140370e+04        0.0    True    True 2024-03-30 20:00:00-04:00 2024-03-07 12:29:32.817000-05:00 0x807477fA08D1544B8750b6C8EB007272A835b28C 2026-02-03 22:24:45.585912
+255335 0xa0811c97f529d627b7774a5b188e605736b745a1f892c39e16c5a022fdb84b8b                   Fed rate cut by September 18?                 fed-rate-cut-by-september-18 ["Yes", "No"]     ["1", "0"]  ["50376722767982976792819483321675476184683505970028931051190616149906273365875", "37897010840099630081979453373185488191860949983734816397821701022706799414185"] 2.034532e+07        0.0    True    True 2024-09-17 20:00:00-04:00 2024-03-07 13:53:28.276000-05:00 0xFEB5F64B994319d6b6750dD92599Bb7f6822E23b 2026-02-03 22:24:45.585912
+255336 0x642926331d650ed2e4e1da2593f388cd803b4f283e09218fc1c5de90087b585c                     Fed rate cut by November 7?                   fed-rate-cut-by-november-7 ["Yes", "No"]     ["1", "0"]  ["93228023618410490101171282292262923995154960859974869936361626344713447693757", "65773435103546041498070625786375232393837706669787188912401598120638608594915"] 2.020983e+06        0.0    True    True 2024-11-06 19:00:00-05:00 2024-03-07 13:53:28.351000-05:00 0x196Eca1073D27f82939CAc927E166785CED2439D 2026-02-03 22:24:45.585912
+255337 0x4057c2528a3815d460f0c5889f52a914745b23400c4548804afee8f9c4a56ec3                    Fed rate cut by December 18?                  fed-rate-cut-by-december-18 ["Yes", "No"]     ["1", "0"] ["114348764082100671299495859311302103169701355134735300981582468907792902121612", "66617594884926885005192561525755499429675143764862756277959731751993175054056"] 2.269863e+06        0.0    True    True 2024-12-17 19:00:00-05:00 2024-03-07 13:53:28.352000-05:00 0x2755b28f96fF52f6C1369ba66c11109cd8dBD2ef 2026-02-03 22:24:45.585912
+255338 0xffe5983ed59a0e850e338d77f0a9a15a2ee72f66f6c7a37b2329e92ca69a7e66      Kung Fu Panda 4 over $48m opening weekend?     kung-fu-panda-4-over-48m-opening-weekend ["Yes", "No"]     ["1", "0"]    ["33836461736584363641414201746740864752829976766984025986971846433209661079864", "772443930054687972988301396512612976592585087073660908198858066790908856230"] 4.394703e+04        0.0    True    True 2024-03-10 20:00:00-04:00 2024-03-07 13:57:06.892000-05:00 0x47A21296A97861EAa5346ff90964AE5446dBa0A3 2026-02-03 22:24:45.585912
+
+================================================================================
+Inspecting folder: C:\Users\anuch\OneDrive\Documents\GitHub\cse-6242-prediction-market-analysis\data\polymarket\trades
+================================================================================
+
+ File: trades_0_10000.parquet
+
+Schema:
+     column_name  column_type null  key default extra
+    block_number       BIGINT  YES None    None  None
+transaction_hash      VARCHAR  YES None    None  None
+       log_index       BIGINT  YES None    None  None
+      order_hash      VARCHAR  YES None    None  None
+           maker      VARCHAR  YES None    None  None
+           taker      VARCHAR  YES None    None  None
+  maker_asset_id      VARCHAR  YES None    None  None
+  taker_asset_id      VARCHAR  YES None    None  None
+    maker_amount       BIGINT  YES None    None  None
+    taker_amount       BIGINT  YES None    None  None
+             fee       BIGINT  YES None    None  None
+       timestamp      INTEGER  YES None    None  None
+     _fetched_at TIMESTAMP_NS  YES None    None  None
+       _contract      VARCHAR  YES None    None  None
+
+Total rows: 10000
+
+First 5 rows:
+ block_number                                                 transaction_hash  log_index                                                       order_hash                                      maker                                      taker maker_asset_id                                                                 taker_asset_id  maker_amount  taker_amount  fee  timestamp                _fetched_at    _contract
+     40000176 d04d37c8b4e36bfdc3469d0e69dd4f43579680cd7707153623236a8ba2a25eb9        179 d5552e9db0847fa6dc51bfaaf0d9957e8836d9c044ba711ef05fe898fbe2627e 0xd1acd3925D895DE9AEC98Ff95F3A30C5279d08d5 0xE58Ec10d493AC0916B0B1b0a802AAEfF3BAd43e7              0 108430748466715852616988667809810953079156970963086484559738136168402442879009      73000000     100000000    0       <NA> 2026-01-29 15:48:12.728779 CTF Exchange
+     40000176 d04d37c8b4e36bfdc3469d0e69dd4f43579680cd7707153623236a8ba2a25eb9        187 d9366c797214979aa320c5fe11cc137a58e192b1be399a09cfb2f9d123114c48 0x3Cf3E8d5427aED066a7A5926980600f6C3Cf87B3 0xE58Ec10d493AC0916B0B1b0a802AAEfF3BAd43e7              0 108430748466715852616988667809810953079156970963086484559738136168402442879009      18250000      25000000    0       <NA> 2026-01-29 15:48:12.728779 CTF Exchange
+     40000176 d04d37c8b4e36bfdc3469d0e69dd4f43579680cd7707153623236a8ba2a25eb9        195 9ed6a1c3d0f9e67186bb5a82f086ef550ca0d3b6896b3c9a42faf09838d96063 0x3Cf3E8d5427aED066a7A5926980600f6C3Cf87B3 0xE58Ec10d493AC0916B0B1b0a802AAEfF3BAd43e7              0 108430748466715852616988667809810953079156970963086484559738136168402442879009      10950000      15000000    0       <NA> 2026-01-29 15:48:12.728779 CTF Exchange
+     40000176 d04d37c8b4e36bfdc3469d0e69dd4f43579680cd7707153623236a8ba2a25eb9        203 d4491a0ef1b8b90192a29f58f6724b66dd561363ffb7e989ec558fe1ebd7f918 0x8A4c788F043023b8B28a762216d037E9f148532b 0xE58Ec10d493AC0916B0B1b0a802AAEfF3BAd43e7              0 108430748466715852616988667809810953079156970963086484559738136168402442879009      79200000     110000000    0       <NA> 2026-01-29 15:48:12.728779 CTF Exchange
+     40000176 d04d37c8b4e36bfdc3469d0e69dd4f43579680cd7707153623236a8ba2a25eb9        211 fcfa918ab50bb1476e505bf8fa491c4430ba665140ddfe59e3d3df2511895e2b 0xd1acd3925D895DE9AEC98Ff95F3A30C5279d08d5 0xE58Ec10d493AC0916B0B1b0a802AAEfF3BAd43e7              0 108430748466715852616988667809810953079156970963086484559738136168402442879009      72000000     100000000    0       <NA> 2026-01-29 15:48:12.728779 CTF Exchange
+
+ File: trades_100000000_100010000.parquet
+
+Schema:
+     column_name  column_type null  key default extra
+    block_number       BIGINT  YES None    None  None
+transaction_hash      VARCHAR  YES None    None  None
+       log_index       BIGINT  YES None    None  None
+      order_hash      VARCHAR  YES None    None  None
+           maker      VARCHAR  YES None    None  None
+           taker      VARCHAR  YES None    None  None
+  maker_asset_id      VARCHAR  YES None    None  None
+  taker_asset_id      VARCHAR  YES None    None  None
+    maker_amount       BIGINT  YES None    None  None
+    taker_amount       BIGINT  YES None    None  None
+             fee       BIGINT  YES None    None  None
+       timestamp      INTEGER  YES None    None  None
+     _fetched_at TIMESTAMP_NS  YES None    None  None
+       _contract      VARCHAR  YES None    None  None
+
+Total rows: 10000
+
+First 5 rows:
+ block_number                                                 transaction_hash  log_index                                                       order_hash                                      maker                                      taker maker_asset_id                                                                 taker_asset_id  maker_amount  taker_amount  fee  timestamp                _fetched_at            _contract
+     71735002 caba36f77f134a9be50ec8b2cd3a45bb7edf52ba6eea3ea91131983bcc5b8004        232 54fe5f6e843f362657e59f7621d7d4fa1ec2ae38f0fc199067921306f06ef0f0 0x3645854739ce939E9e166179dAb9d06Fe8f4ffF4 0xC5d563A36AE78145C45a50134d48A1215220f80a              0 102830022876205815481760181700670104098199281884691537174046087425418764513503      10199560      10220000    0       <NA> 2026-01-30 15:42:18.733579 NegRisk CTF Exchange
+     71735003 e5c6488c92285f48d6055d721d27dfe9377af1235ef5b43adaca3e4cd7f327fa        209 3b5b5a2b3667307de50d8cf0634f9ca80b4382c94f39154c0596ffbee772a444 0x7c156Bb0DBb44dcb7387A78778E0Da313Bf3C9db 0x2296adFDD4ae470d8206a385B800AE6A5F6bf651              0 106153378961102532315642223211322829491902773315904192835321056658787574388535    4650000000    5000000000    0       <NA> 2026-01-30 15:42:18.733579 NegRisk CTF Exchange
+     71735003 e5c6488c92285f48d6055d721d27dfe9377af1235ef5b43adaca3e4cd7f327fa        211 29d1b3e8053bc63174e1c68087b0a357138ec2ad2907c75333b10bf02cd93f52 0x2296adFDD4ae470d8206a385B800AE6A5F6bf651 0xC5d563A36AE78145C45a50134d48A1215220f80a              0  77444435762420711044339640645792265526010696615911175439180482698545420366139     350000000    5000000000    0       <NA> 2026-01-30 15:42:18.733579 NegRisk CTF Exchange
+     71735003 60d8610c631a94c20c47153f1346560a246e9febe2f2643f534bbbccf773f3bb        218 3ec24a80a362d959a380e1b60747139b10553c14b732cafb807fd035895dd087 0xa3e22cd32AA9238eF7dBCfB4761E33b9EAA1fdf8 0x063AEeE10fBfd55b6deF10Da28E87A601e7dEB4b              0  49442968827629136955116443209477849997264422812879822210904546887165673579224      27295000     103000000    0       <NA> 2026-01-30 15:42:18.733579 NegRisk CTF Exchange
+     71735003 60d8610c631a94c20c47153f1346560a246e9febe2f2643f534bbbccf773f3bb        222 75833fd1e91230afffc45c538307a02ea9bd72be60a3b395be121f212c01eb62 0xcE401b42568CdFED369eC1867c4b7176E994Da67 0x063AEeE10fBfd55b6deF10Da28E87A601e7dEB4b              0  49442968827629136955116443209477849997264422812879822210904546887165673579224     236808000     897000000    0       <NA> 2026-01-30 15:42:18.733579 NegRisk CTF Exchange
+
+ File: trades_10000000_10010000.parquet
+
+Schema:
+     column_name  column_type null  key default extra
+    block_number       BIGINT  YES None    None  None
+transaction_hash      VARCHAR  YES None    None  None
+       log_index       BIGINT  YES None    None  None
+      order_hash      VARCHAR  YES None    None  None
+           maker      VARCHAR  YES None    None  None
+           taker      VARCHAR  YES None    None  None
+  maker_asset_id      VARCHAR  YES None    None  None
+  taker_asset_id      VARCHAR  YES None    None  None
+    maker_amount       BIGINT  YES None    None  None
+    taker_amount       BIGINT  YES None    None  None
+             fee       BIGINT  YES None    None  None
+       timestamp      INTEGER  YES None    None  None
+     _fetched_at TIMESTAMP_NS  YES None    None  None
+       _contract      VARCHAR  YES None    None  None
+
+Total rows: 10000
+
+First 5 rows:
+ block_number                                                 transaction_hash  log_index                                                       order_hash                                      maker                                      taker                                                                maker_asset_id                                                                taker_asset_id  maker_amount  taker_amount  fee  timestamp                _fetched_at            _contract
+     62564883 2c8d242029c20be5f17c682b3cf4b42560847bbb4d37abe13299ebd931fd8265         16 2ba5804fc382bff2a197b37cbacb184bb36500c353f99023a69506c2b9b3af20 0x8119010a6e589062aA03583BB3F39cA632d9F887 0x75c18b1076CE7EB8Ab4dD7578f4e6Edc4692fC78                                                                             0 21742633143463906290569050155826241533067272736897614950488156847949938836455    2326895910    4719870000    0       <NA> 2026-01-29 22:55:17.944693 NegRisk CTF Exchange
+     62564883 2c8d242029c20be5f17c682b3cf4b42560847bbb4d37abe13299ebd931fd8265         18 d17ae4588e3d04c2500a91bcaef1fc34eec0af8f11f4145b79cc75f3c36e1ef7 0x75c18b1076CE7EB8Ab4dD7578f4e6Edc4692fC78 0xC5d563A36AE78145C45a50134d48A1215220f80a 21742633143463906290569050155826241533067272736897614950488156847949938836455                                                                             0    4719870000    2326895910    0       <NA> 2026-01-29 22:55:17.944693 NegRisk CTF Exchange
+     62564885 abac113cd1e6cdc6d557a3c57a8400534aaff80fa5aab84ac27efe7754aa6158         52 2ba5804fc382bff2a197b37cbacb184bb36500c353f99023a69506c2b9b3af20 0x8119010a6e589062aA03583BB3F39cA632d9F887 0xB8eF6a69fE2311c14aA651F0cDa99154Cd3F5621                                                                             0 21742633143463906290569050155826241533067272736897614950488156847949938836455     198755818     403155817    0       <NA> 2026-01-29 22:55:17.944693 NegRisk CTF Exchange
+     62564885 abac113cd1e6cdc6d557a3c57a8400534aaff80fa5aab84ac27efe7754aa6158         54 fd51159cafc6159f2e56acb8f101cd2636f4e9e388043d92bae19539d46a268e 0xB8eF6a69fE2311c14aA651F0cDa99154Cd3F5621 0xC5d563A36AE78145C45a50134d48A1215220f80a                                                                             0 48331043336612883890938759509493159234755048973500640148014422747788308965732     204399999     403155817    0       <NA> 2026-01-29 22:55:17.944693 NegRisk CTF Exchange
+     62564885 0c128dc1c7b9ac2a76390d6151b55dc8e1630ead35d253b6a5924bbff2fc0f30         75 2ba5804fc382bff2a197b37cbacb184bb36500c353f99023a69506c2b9b3af20 0x8119010a6e589062aA03583BB3F39cA632d9F887 0xf60D86cffC910d088c54c534F58a522bf7A9a974                                                                             0 21742633143463906290569050155826241533067272736897614950488156847949938836455     905034610    1835770000    0       <NA> 2026-01-29 22:55:17.944693 NegRisk CTF Exchange
