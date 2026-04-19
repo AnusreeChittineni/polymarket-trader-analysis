@@ -11,6 +11,7 @@ wheels/
 
 # Virtual environments
 .venv
+.vendor/
 .backfill_cursor
 data
 data.zip
@@ -28,3 +29,5 @@ fig
 *.tar.zst
 output
 .tmp
+.pytest_tmp/
+pytest-cache-files-*

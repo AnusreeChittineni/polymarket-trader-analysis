@@ -86,6 +86,7 @@ This creates a zstd-compressed tar archive (`data.tar.zst`) and removes the `dat
 
 - [Data Schemas](docs/SCHEMAS.md) - Parquet file schemas for markets and trades
 - [Writing Analyses](docs/ANALYSIS.md) - Guide for writing custom analysis scripts
+- [Trader Clustering Handoff](docs/TRADER_CLUSTERING.md) - Schema, preprocessing, KMeans pipeline, and visualization-ready outputs for trader archetypes
 
 ## Contributing
 
