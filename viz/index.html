@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Traders: Win rate vs Market type (Canvas + D3)</title>
+    <style>
+      :root {
+  --bg: #0b1220;
+  --panel: #0f172a;
+  --text: #e5e7eb;
+  --muted: #94a3b8;
+  --border: #1f2a44;
+  --control-bg: #111c33;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        color: var(--text);
+        background: var(--bg);
+      }
+      header {
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--border);
+  background: var(--panel);
+      }
+      header h2 {
+        margin: 0;
+        font-weight: 650;
+        font-size: 18px;
+      }
+      header .sub {
+        margin-top: 6px;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.35;
+      }
+      #controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: end;
+        padding: 10px 18px;
+        border-bottom: 1px solid var(--border);
+  background: var(--panel);
+      }
+      .control {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      label {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      select,
+      input,
+      button {
+        padding: 7px 10px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--control-bg);
+        color: var(--text);
+        font-size: 13px;
+      }
+      select:focus,
+      input:focus,
+      button:focus {
+        outline: 2px solid rgba(59, 130, 246, 0.55);
+        outline-offset: 1px;
+      }
+      button {
+        cursor: pointer;
+      }
+      button:hover {
+        background: #162447;
+      }
+      #status {
+        color: var(--muted);
+        font-size: 13px;
+        padding-left: 8px;
+        align-self: center;
+      }
+      #viz {
+        position: relative;
+        height: calc(100vh - 140px);
+      }
+      canvas {
+        position: absolute;
+        inset: 0;
+      }
+      svg {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+      }
+      /* Axis styling (D3 writes SVG elements, so we style them via CSS) */
+      svg .domain {
+        stroke: #334155;
+      }
+      svg .tick line {
+        stroke: #1f2a44;
+      }
+      svg .tick text {
+        fill: #cbd5e1;
+      }
+      .tooltip {
+        position: absolute;
+        pointer-events: none;
+  background: rgba(248, 250, 252, 0.96);
+  color: #0b1220;
+        padding: 8px 10px;
+        border-radius: 10px;
+        font-size: 12px;
+        line-height: 1.3;
+        max-width: 320px;
+        transform: translate(10px, 10px);
+        display: none;
+  border: 1px solid rgba(148, 163, 184, 0.6);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.35);
+      }
+      .tooltip .mono {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h2>Prediction Market Exploratory Visualizations: Viewing Trader Archetypes</h2>
+
+    </header>
+
+    <div id="controls">
+      <div class="control">
+        <label for="xAxis">X axis</label>
+        <select id="xAxis">
+          <option value="category" selected>category</option>
+          <option value="total_trade_number">total_trade_number</option>
+        </select>
+      </div>
+      <div class="control">
+        <label for="yAxis">Y axis</label>
+        <select id="yAxis">
+          <option value="win_rate_proxy" selected>win_rate_proxy</option>
+        </select>
+      </div>
+      <div class="control">
+        <label for="maxPoints">Max points</label>
+        <input id="maxPoints" type="number" min="1000" max="200000" step="1000" value="50000" />
+      </div>
+      <div class="control">
+        <label for="minPositions">Min positions</label>
+        <input id="minPositions" type="number" min="1" max="500" step="1" value="1" />
+      </div>
+      <div class="control">
+        <label for="category">Category</label>
+        <select id="category">
+          <option value="">All</option>
+        </select>
+      </div>
+      <div class="control">
+  <label for="pointAlpha">Point transparency</label>
+        <input id="pointAlpha" type="number" min="0.05" max="1" step="0.05" value="0.35" />
+      </div>
+      <div class="control">
+        <button id="reload">Reload</button>
+      </div>
+      <div id="status"></div>
+    </div>
+
+    <div id="viz">
+      <canvas id="plot"></canvas>
+      <svg id="axes"></svg>
+      <div class="tooltip" id="tooltip"></div>
+    </div>
+
+    <!-- D3 bundles (UMD) -->
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <script src="./main.js"></script>
+  </body>
+</html>

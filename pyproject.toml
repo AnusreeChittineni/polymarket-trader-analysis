@@ -8,6 +8,7 @@ dependencies = [
     "brokenaxes>=0.6.2",
     "cryptography>=46.0.3",
     "duckdb>=1.4.2",
+`    "fastapi>=0.115.0",
     "httpx>=0.28.1",
     "imageio>=2.36.0",
     "kalshi-python>=2.1.4",
@@ -19,6 +20,7 @@ dependencies = [
     "squarify>=0.4.4",
     "tenacity>=8.0.0",
     "tqdm>=4.67.1",
+    "uvicorn[standard]>=0.30.0",
     "web3>=6.0.0",
     "simple-term-menu>=1.6.0",
     "python-dotenv>=1.2.1",
@@ -38,10 +40,10 @@ markers = ["slow: marks tests as slow (deselect with '-m \"not slow\"')"]
 target-version = "py39"
 line-length = 120
 exclude = [".venv"]
-
+`~
 [tool.ruff.lint]
 select = [
-    "E",      # pycodestyle errors
+    "E",      # pycode`style errors
     "W",      # pycodestyle warnings
     "F",      # pyflakes
     "I",      # isort
