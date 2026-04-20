@@ -11,7 +11,7 @@ Inspecting folder: C:\Users\anuch\OneDrive\Documents\GitHub\cse-6242-prediction-
 Inspecting folder: C:\Users\anuch\OneDrive\Documents\GitHub\cse-6242-prediction-market-analysis\data\kalshi\markets
 ================================================================================
 
- File: markets_0_10000.parquet
+File: markets_0_10000.parquet
 
 Schema:
   column_name              column_type null  key default extra
