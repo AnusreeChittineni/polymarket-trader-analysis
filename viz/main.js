@@ -3,7 +3,13 @@
 // Canvas + D3 axes for large scatter.
 // Each point: trader×category.
 
-const DATA_URL = "../samples/trader_win_rate_by_category.csv";
+const DATA_URL = "../samples/clustered_traders.csv";
+
+const clusterColor = d3.scaleOrdinal()
+  .domain(d3.range(20))
+  .range(
+    d3.range(20).map(i => `hsl(${i * 18}, 70%, 55%)`)
+  );
 
 const els = {
   canvas: document.getElementById("plot"),
@@ -30,12 +36,38 @@ let xScale, yScale;
 let points = []; // points with screen coords for hit-testing
 
 function getXAxisField() {
-  return (els.xAxis && els.xAxis.value) || "category";
+  return (els.xAxis && els.xAxis.value) || "tsne_1";
 }
 
 function getYAxisField() {
-  // For now the UI only offers win_rate_proxy.
-  return (els.yAxis && els.yAxis.value) || "win_rate_proxy";
+  return (els.yAxis && els.yAxis.value) || "tsne_2";
+}
+
+function isNumericField(field) {
+  return [
+    "win_rate",
+    "avg_trade_size",
+    "total_trade_volume",
+    "total_trade_number",
+    "frequency",
+    "net_gains",
+    "avg_odds",
+    "tsne_1",
+    "tsne_2"
+  ].includes(field);
+}
+
+function getValue(d, field) {
+  if (field === "win_rate") return d.win_rate;
+  if (field === "avg_trade_size") return d.avg_size;
+  if (field === "total_trade_volume") return d.total_volume;
+  if (field === "total_trade_number") return d.total_number;
+  if (field === "frequency") return d.frequency;
+  if (field === "net_gains") return d.net_gain;
+  if (field === "avg_odds") return d.avg_odds;
+  if (field === "tsne_1") return d.tsne_1;
+  if (field === "tsne_2") return d.tsne_2;
+  return null;
 }
 
 function setStatus(msg) {
@@ -65,11 +97,17 @@ function resize() {
 function parseRow(d) {
   return {
     trader: d.trader,
-    category: d.category,
-    win: +d.win_rate_proxy,
-    n: +d.n_positions,
-  trades: +d.total_trade_number,
-    vol: +d.total_position_size,
+    win_rate: +d.win_rate,
+    avg_size: +d.avg_trade_size,
+    total_volume: +d.total_trade_volume,
+    total_number: +d.total_trade_number,
+    frequency: +d.frequency,
+    net_gain: +d.net_gains_loss,
+    avg_odds: +d.avg_odds,
+    tsne_1: +d.tsne_1,
+    tsne_2: +d.tsne_2,
+    kmeans: +d.kmeans_cluster,
+    dbscan: +d.hdbscan_cluster,
   };
 }
 
@@ -89,13 +127,16 @@ function filterAndDownsample() {
   const minPos = Math.max(1, parseInt(els.minPositions.value, 10) || 1);
   const category = els.category.value;
 
+  const xField = getXAxisField();
+  const yField = getYAxisField();
+
   let df = raw;
-  if (category) df = df.filter((d) => d.category === category);
-  df = df.filter((d) => d.n >= minPos && Number.isFinite(d.win));
+  // if (category) df = df.filter((d) => d.category === category);
+  df = df.filter((d) => (Number.isFinite(getValue(d, xField)) && Number.isFinite(getValue(d, yField))));
 
   // Keep high-activity points first; if too many, sample the rest deterministically.
-  df = df.slice().sort((a, b) => (b.n - a.n) || (b.vol - a.vol));
-
+  df = df.slice().sort((a, b) => (b.total_number - a.total_number) || (b.total_volume - a.total_volume));
+  
   if (df.length <= maxPoints) return df;
 
   const head = Math.floor(maxPoints * 0.7);
@@ -132,9 +173,10 @@ function buildScales() {
   const innerH = Math.max(10, height - margin.top - margin.bottom);
 
   const xField = getXAxisField();
+  const yField = getYAxisField();
 
-  if (xField === "total_trade_number") {
-    const xs = raw.map((d) => d.trades).filter((v) => Number.isFinite(v));
+  if (isNumericField(xField)) {
+    const xs = raw.map((d) => getValue(d, xField)).filter((v) => Number.isFinite(v));
     const xMin = d3.min(xs) ?? 0;
     const xMax = d3.max(xs) ?? 1;
     xScale = d3
@@ -151,11 +193,16 @@ function buildScales() {
       .padding(0.5);
   }
 
-  yScale = d3
-    .scaleLinear()
-    .domain([0.25, 0.75])
-    .nice()
-    .range([margin.top + innerH, margin.top]);
+  if (isNumericField(yField)) {
+    const ys = raw.map((d) => getValue(d, yField)).filter((v) => Number.isFinite(v));
+    const yMin = d3.min(ys) ?? 0;
+    const yMax = d3.max(ys) ?? 1;
+    yScale = d3
+      .scaleLinear()
+      .domain([yMin, yMax])
+      .nice()
+      .range([margin.top + innerH, margin.top]);
+  }
 }
 
 function renderAxes() {
@@ -163,10 +210,13 @@ function renderAxes() {
   svg.selectAll("*").remove();
 
   const xField = getXAxisField();
-  const xAxis = xField === "total_trade_number" ? d3.axisBottom(xScale).ticks(10) : d3.axisBottom(xScale);
+  const yField = getYAxisField();
+
+  const xAxis = isNumericField(xField) ? d3.axisBottom(xScale).ticks(10) : d3.axisBottom(xScale);
   const yAxis = d3.axisLeft(yScale).ticks(8);
 
   const rect = els.viz.getBoundingClientRect();
+  const width = rect.width;
   const height = rect.height;
 
   svg
@@ -174,7 +224,7 @@ function renderAxes() {
     .attr("transform", `translate(0,${height - margin.bottom})`)
     .call(xAxis)
     .call((g) => {
-      if (xField !== "total_trade_number") {
+      if (!isNumericField(xField)) {
         g.selectAll("text").attr("transform", "rotate(-20)").style("text-anchor", "end");
       }
     });
@@ -186,11 +236,20 @@ function renderAxes() {
 
   svg
     .append("text")
-    .attr("x", margin.left)
-    .attr("y", 12)
-    .attr("fill", "#6b7280")
-    .attr("font-size", 12)
-  .text(getYAxisField());
+    .attr("x", width / 2)
+    .attr("y", height - 5)
+    .attr("text-anchor", "middle")
+    .attr("fill", "#cbd5e1")
+    .text(xField);
+
+  svg
+    .append("text")
+    .attr("transform", "rotate(-90)")
+    .attr("x", -height / 2)
+    .attr("y", 15)
+    .attr("text-anchor", "middle")
+    .attr("fill", "#cbd5e1")
+    .text(yField);
 }
 
 function renderPoints() {
@@ -200,6 +259,7 @@ function renderPoints() {
   const height = rect.height;
 
   const xField = getXAxisField();
+  const yField = getYAxisField();
 
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   ctx.clearRect(0, 0, width, height);
@@ -237,8 +297,8 @@ function renderPoints() {
   function colorForWin(w) {
     const t = Math.max(0, Math.min(1, (w - 0.25) / 0.5));
     // interpolate between two RGB colors
-  const c0 = [96, 165, 250]; // blue-400 (brighter)
-  const c1 = [52, 211, 153]; // emerald-400 (brighter)
+    const c0 = [96, 165, 250]; // blue-400 (brighter)
+    const c1 = [52, 211, 153]; // emerald-400 (brighter)
     const r = Math.round(c0[0] + (c1[0] - c0[0]) * t);
     const g = Math.round(c0[1] + (c1[1] - c0[1]) * t);
     const b = Math.round(c0[2] + (c1[2] - c0[2]) * t);
@@ -246,7 +306,7 @@ function renderPoints() {
   }
 
   // Radius scaled by sqrt(volume) but clamped.
-  const vols = df.map((d) => (Number.isFinite(d.vol) ? d.vol : 0));
+  const vols = df.map((d) => (Number.isFinite(d.total_volume) ? d.total_volume : 0));
   const vMax = Math.max(1, ...vols);
   const rScale = (v) => {
     const t = Math.sqrt(Math.max(0, v) / vMax);
@@ -256,13 +316,13 @@ function renderPoints() {
   // Render
   for (let i = 0; i < df.length; i++) {
     const d = df[i];
-  const x = xField === "total_trade_number" ? xScale(d.trades) : xScale(d.category);
-    const y = yScale(d.win);
+    const x = xScale(getValue(d, xField));
+    const y = yScale(getValue(d, yField));
     if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
 
-    const r = rScale(d.vol);
+    const r = rScale(d.total_volume);
     ctx.beginPath();
-    ctx.fillStyle = colorForWin(d.win);
+    ctx.fillStyle = clusterColor(d.kmeans);
     ctx.arc(x, y, r, 0, Math.PI * 2);
     ctx.fill();
 
@@ -305,14 +365,12 @@ function onMove(evt) {
       return;
     }
 
-    const { trader, category, win, n, trades, vol } = p.d;
+    const { trader, win_rate, total_number, total_volume } = p.d;
     els.tooltip.innerHTML = `
       <div class="mono"><b>${trader}</b></div>
-      <div>Category: <b>${category}</b></div>
-      <div>Win rate (proxy): <b>${win.toFixed(4)}</b></div>
-      <div>Positions: <b>${n}</b></div>
-      <div>Total trade number: <b>${Number.isFinite(trades) ? Math.round(trades).toLocaleString() : ""}</b></div>
-      <div>Total size: <b>${Math.round(vol).toLocaleString()}</b></div>
+      <div>Win Rate: <b>${win_rate.toFixed(4)}</b></div>
+      <div>Total Trade Number: <b>${Number.isFinite(total_number) ? Math.round(total_number).toLocaleString() : ""}</b></div>
+      <div>Total Volume: <b>${Math.round(total_volume).toLocaleString()}</b></div>
     `;
     els.tooltip.style.left = `${mx}px`;
     els.tooltip.style.top = `${my}px`;
@@ -327,8 +385,8 @@ async function loadData() {
   const df = await d3.csv(DATA_URL, parseRow);
 
   raw = df;
-  categoriesAll = Array.from(new Set(raw.map((d) => d.category))).sort();
-  populateCategoryDropdown();
+  // categoriesAll = Array.from(new Set(raw.map((d) => d.category))).sort();
+  // populateCategoryDropdown();
 
   buildScales();
   renderAxes();
@@ -336,6 +394,8 @@ async function loadData() {
 }
 
 els.reload.addEventListener("click", () => {
+  buildScales();
+  renderAxes();
   renderPoints();
 });
 
