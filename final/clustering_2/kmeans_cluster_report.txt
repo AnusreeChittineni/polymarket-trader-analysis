@@ -1,0 +1,79 @@
+CLUSTER REPORT: kmeans
+============================================================
+
+----------------------------------------
+Cluster 0
+----------------------------------------
+win_rate_ignore_sales: mean=0.1282, median=0.1053, global=0.4940, diff=-0.3658, -74.0%
+avg_odds_ignore_sales: mean=0.1301, median=0.1088, global=0.4831, diff=-0.3530, -73.1%
+profit_per_trade_ignore_sales: mean=-1.8959, median=-0.6115, global=-5.6435, diff=+3.7476, -66.4%
+total_trade_number: mean=217.5029, median=159.0000, global=836.2394, diff=-618.7364, -74.0%
+frequency: mean=14.6251, median=0.7379, global=34.8509, diff=-20.2259, -58.0%
+avg_trade_size: mean=31.3436, median=12.8859, global=87.3004, diff=-55.9568, -64.1%
+total_trade_volume: mean=5149.5340, median=1990.5910, global=83623.7602, diff=-78474.2262, -93.8%
+
+----------------------------------------
+Cluster 1
+----------------------------------------
+win_rate_ignore_sales: mean=0.5367, median=0.5278, global=0.4940, diff=+0.0426, +8.6%
+avg_odds_ignore_sales: mean=0.5235, median=0.5157, global=0.4831, diff=+0.0403, +8.4%
+profit_per_trade_ignore_sales: mean=-0.7911, median=-0.3030, global=-5.6435, diff=+4.8524, -86.0%
+total_trade_number: mean=186.3974, median=146.0000, global=836.2394, diff=-649.8420, -77.7%
+frequency: mean=15.5046, median=2.4770, global=34.8509, diff=-19.3464, -55.5%
+avg_trade_size: mean=12.0104, median=9.9038, global=87.3004, diff=-75.2900, -86.2%
+total_trade_volume: mean=1979.7855, median=1525.3638, global=83623.7602, diff=-81643.9746, -97.6%
+
+----------------------------------------
+Cluster 2
+----------------------------------------
+win_rate_ignore_sales: mean=0.4796, median=0.5035, global=0.4940, diff=-0.0144, -2.9%
+avg_odds_ignore_sales: mean=0.4738, median=0.4975, global=0.4831, diff=-0.0093, -1.9%
+profit_per_trade_ignore_sales: mean=-5.9224, median=-1.5710, global=-5.6435, diff=-0.2788, +4.9%
+total_trade_number: mean=6361.5536, median=1858.0000, global=836.2394, diff=+5525.3142, +660.7%
+frequency: mean=204.3177, median=49.8448, global=34.8509, diff=+169.4668, +486.3%
+avg_trade_size: mean=73.7493, median=20.3159, global=87.3004, diff=-13.5511, -15.5%
+total_trade_volume: mean=528180.7639, median=43277.8294, global=83623.7602, diff=+444557.0037, +531.6%
+
+----------------------------------------
+Cluster 3
+----------------------------------------
+win_rate_ignore_sales: mean=0.8686, median=0.8793, global=0.4940, diff=+0.3746, +75.8%
+avg_odds_ignore_sales: mean=0.8174, median=0.8359, global=0.4831, diff=+0.3342, +69.2%
+profit_per_trade_ignore_sales: mean=11.9720, median=1.0482, global=-5.6435, diff=+17.6155, -312.1%
+total_trade_number: mean=308.7940, median=200.0000, global=836.2394, diff=-527.4453, -63.1%
+frequency: mean=76.1500, median=13.0000, global=34.8509, diff=+41.2991, +118.5%
+avg_trade_size: mean=230.4326, median=90.7305, global=87.3004, diff=+143.1322, +164.0%
+total_trade_volume: mean=77455.2087, median=20690.3400, global=83623.7602, diff=-6168.5515, -7.4%
+
+----------------------------------------
+Cluster 4
+----------------------------------------
+win_rate_ignore_sales: mean=0.4841, median=0.5000, global=0.4940, diff=-0.0099, -2.0%
+avg_odds_ignore_sales: mean=0.4776, median=0.4965, global=0.4831, diff=-0.0055, -1.1%
+profit_per_trade_ignore_sales: mean=-9.0056, median=-1.7810, global=-5.6435, diff=-3.3621, +59.6%
+total_trade_number: mean=260.8753, median=184.0000, global=836.2394, diff=-575.3640, -68.8%
+frequency: mean=4.0579, median=0.9102, global=34.8509, diff=-30.7930, -88.4%
+avg_trade_size: mean=128.4731, median=84.7257, global=87.3004, diff=+41.1727, +47.2%
+total_trade_volume: mean=31216.5137, median=14838.1827, global=83623.7602, diff=-52407.2465, -62.7%
+
+----------------------------------------
+Cluster 5
+----------------------------------------
+win_rate_ignore_sales: mean=0.9091, median=1.0000, global=0.4940, diff=+0.4151, +84.0%
+avg_odds_ignore_sales: mean=0.7321, median=0.6690, global=0.4831, diff=+0.2490, +51.5%
+profit_per_trade_ignore_sales: mean=1245.6322, median=994.1989, global=-5.6435, diff=+1251.2757, -22171.9%
+total_trade_number: mean=483.3333, median=223.0000, global=836.2394, diff=-352.9060, -42.2%
+frequency: mean=110.2303, median=97.0909, global=34.8509, diff=+75.3794, +216.3%
+avg_trade_size: mean=1463.1427, median=134.2233, global=87.3004, diff=+1375.8423, +1576.0%
+total_trade_volume: mean=1494342.7423, median=21870.3389, global=83623.7602, diff=+1410718.9821, +1687.0%
+
+----------------------------------------
+Cluster 6
+----------------------------------------
+win_rate_ignore_sales: mean=0.3836, median=0.4094, global=0.4940, diff=-0.1105, -22.4%
+avg_odds_ignore_sales: mean=0.4516, median=0.4899, global=0.4831, diff=-0.0316, -6.5%
+profit_per_trade_ignore_sales: mean=-314.3732, median=-270.6213, global=-5.6435, diff=-308.7297, +5470.5%
+total_trade_number: mean=1586.1000, median=177.0000, global=836.2394, diff=+749.8606, +89.7%
+frequency: mean=17.3452, median=3.0598, global=34.8509, diff=-17.5058, -50.2%
+avg_trade_size: mean=1026.0775, median=712.1198, global=87.3004, diff=+938.7771, +1075.3%
+total_trade_volume: mean=1291624.7595, median=204836.7579, global=83623.7602, diff=+1208000.9994, +1444.6%
