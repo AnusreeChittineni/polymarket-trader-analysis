@@ -5,10 +5,11 @@
 
 const DATA_URL = "../samples/clustered_traders.csv";
 
+const num_clusters = 7
 const clusterColor = d3.scaleOrdinal()
-  .domain(d3.range(20))
+  .domain(d3.range(num_clusters))
   .range(
-    d3.range(20).map(i => `hsl(${i * 18}, 70%, 55%)`)
+    d3.range(num_clusters).map(i => `hsl(${i * (360 / num_clusters)}, 70%, 55%)`)
   );
 
 const els = {
@@ -95,15 +96,33 @@ function resize() {
 }
 
 function parseRow(d) {
+
+  let category = "";
+
+  if (d.category_Crypto === true) {
+    category = "Crypto";
+  } else if (d.category_Economics === true) {
+    category = "Economics";
+  } else if (d.category_Other_Misc === true) {
+    category = "Other/Misc";
+  } else if (d.category_Politics === true) {
+    category = "Politics";
+  } else if (d.category_Sports === true) {
+    category = "Sports";
+  } else {
+    category = "Pop Culture";
+  }
+
   return {
     trader: d.trader,
     win_rate: +d.win_rate,
-    avg_size: +d.avg_trade_size,
-    total_volume: +d.total_trade_volume,
-    total_number: +d.total_trade_number,
-    frequency: +d.frequency,
-    net_gain: +d.net_gains_loss,
+    avg_size: Math.log(+d.avg_trade_size),
+    total_volume: Math.log(+d.total_trade_volume),
+    total_number: Math.log(+d.total_trade_number),
+    frequency: Math.log(+d.frequency),
+    net_gain: Math.log(+d.net_gains_loss),
     avg_odds: +d.avg_odds,
+    category: category,
     tsne_1: +d.tsne_1,
     tsne_2: +d.tsne_2,
     kmeans: +d.kmeans_cluster,
@@ -131,7 +150,7 @@ function filterAndDownsample() {
   const yField = getYAxisField();
 
   let df = raw;
-  // if (category) df = df.filter((d) => d.category === category);
+  if (category) df = df.filter((d) => d.category.localeCompare(category));
   df = df.filter((d) => (Number.isFinite(getValue(d, xField)) && Number.isFinite(getValue(d, yField))));
 
   // Keep high-activity points first; if too many, sample the rest deterministically.
@@ -306,7 +325,7 @@ function renderPoints() {
   }
 
   // Radius scaled by sqrt(volume) but clamped.
-  const vols = df.map((d) => (Number.isFinite(d.total_volume) ? d.total_volume : 0));
+  const vols = df.map((d) => (Number.isFinite(Math.exp(d.total_volume)) ? Math.exp(d.total_volume) : 0));
   const vMax = Math.max(1, ...vols);
   const rScale = (v) => {
     const t = Math.sqrt(Math.max(0, v) / vMax);
@@ -386,7 +405,8 @@ async function loadData() {
 
   raw = df;
   // categoriesAll = Array.from(new Set(raw.map((d) => d.category))).sort();
-  // populateCategoryDropdown();
+  categoriesAll = ["Crypto", "Economics", "Politics", "Pop Culture", "Sports", "Other/Misc"]
+  populateCategoryDropdown();
 
   buildScales();
   renderAxes();
