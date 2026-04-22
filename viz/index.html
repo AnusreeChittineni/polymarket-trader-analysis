@@ -143,6 +143,7 @@
           <option value="avg_trade_size">Avg Trade Size</option>
           <option value="frequency">Frequency</option>
           <option value="net_gains">Net Gains/Losses</option>
+          <option value="profit_per_trade">Profit Per Trade</option>
           <option value="total_trade_number">Total Trade Number</option>
           <option value="total_trade_volume">Total Trade Volume</option>
           <option value="win_rate">Win Rate</option>
@@ -156,6 +157,7 @@
           <option value="avg_trade_size">Avg Trade Size</option>
           <option value="frequency">Frequency</option>
           <option value="net_gains">Net Gains/Losses</option>
+          <option value="profit_per_trade">Profit Per Trade</option>
           <option value="total_trade_number">Total Trade Number</option>
           <option value="total_trade_volume">Total Trade Volume</option>
           <option value="win_rate">Win Rate</option>
@@ -176,8 +178,12 @@
         </select>
       </div>
       <div class="control">
-  <label for="pointAlpha">Point transparency</label>
+        <label for="pointAlpha">Point transparency</label>
         <input id="pointAlpha" type="number" min="0.05" max="1" step="0.05" value="0.35" />
+      </div>
+      <div class="control">
+        <label for="includeSales">Include Sales</label>
+        <input id="includeSales" type="checkbox" />
       </div>
       <div class="control">
         <button id="reload">Reload</button>

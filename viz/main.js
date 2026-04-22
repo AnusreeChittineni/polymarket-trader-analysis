@@ -23,6 +23,7 @@ const els = {
   minPositions: document.getElementById("minPositions"),
   category: document.getElementById("category"),
   pointAlpha: document.getElementById("pointAlpha"),
+  includeSales: document.getElementById("includeSales"),
   reload: document.getElementById("reload"),
   viz: document.getElementById("viz"),
 };
@@ -53,21 +54,23 @@ function isNumericField(field) {
     "frequency",
     "net_gains",
     "avg_odds",
+    "profit_per_trade",
     "tsne_1",
     "tsne_2"
   ].includes(field);
 }
 
-function getValue(d, field) {
-  if (field === "win_rate") return d.win_rate;
-  if (field === "avg_trade_size") return d.avg_size;
-  if (field === "total_trade_volume") return d.total_volume;
-  if (field === "total_trade_number") return d.total_number;
-  if (field === "frequency") return d.frequency;
-  if (field === "net_gains") return d.net_gain;
-  if (field === "avg_odds") return d.avg_odds;
-  if (field === "tsne_1") return d.tsne_1;
-  if (field === "tsne_2") return d.tsne_2;
+function getValue(d, field, idx) {
+  if (field === "win_rate") return d.win_rate[idx];
+  if (field === "avg_trade_size") return d.avg_size[idx];
+  if (field === "total_trade_volume") return d.total_volume[idx];
+  if (field === "total_trade_number") return d.total_number[idx];
+  if (field === "profit_per_trade") return d.profit_per_trade[idx];
+  if (field === "frequency") return d.frequency[idx];
+  if (field === "net_gains") return d.net_gain[idx];
+  if (field === "avg_odds") return d.avg_odds[idx];
+  if (field === "tsne_1") return d.tsne_1[idx];
+  if (field === "tsne_2") return d.tsne_2[idx];
   return null;
 }
 
@@ -113,20 +116,22 @@ function parseRow(d) {
     category = "Pop Culture";
   }
 
+  // index 0 is value including sales, index 1 is value excluding sales
   return {
-    trader: d.trader,
-    win_rate: +d.win_rate,
-    avg_size: Math.log(+d.avg_trade_size),
-    total_volume: Math.log(+d.total_trade_volume),
-    total_number: Math.log(+d.total_trade_number),
-    frequency: Math.log(+d.frequency),
-    net_gain: Math.log(+d.net_gains_loss),
-    avg_odds: +d.avg_odds,
-    category: category,
-    tsne_1: +d.tsne_1,
-    tsne_2: +d.tsne_2,
-    kmeans: +d.kmeans_cluster,
-    dbscan: +d.hdbscan_cluster,
+    trader: [d.trader, d.trader],
+    win_rate: [+d.win_rate, +d.win_rate_ignore_sales],
+    avg_size: [Math.log(+d.avg_trade_size), Math.log(+d.avg_trade_size_ignore_sales)],
+    total_volume: [Math.log(+d.total_trade_volume), Math.log(+d.total_trade_volume_ignore_sales)],
+    total_number: [Math.log(+d.total_trade_number), Math.log(+d.total_trade_number_ignore_sales)],
+    frequency: [Math.log(+d.frequency), Math.log(+d.frequency_ignore_sales)],
+    net_gain: [Math.log(+d.net_gains_loss), Math.log(+d.net_gains_loss_ignore_sales)],
+    avg_odds: [+d.avg_odds, +d.avg_odds_ignore_sales],
+    profit_per_trade: [+d.profit_per_trade, +d.profit_per_trade_ignore_sales],
+    category: [category, category],
+    tsne_1: [+d.tsne_1, +d.tsne_1],
+    tsne_2: [+d.tsne_2, +d.tsne_2],
+    kmeans: [+d.kmeans_cluster, +d.kmeans_cluster],
+    dbscan: [+d.hdbscan_cluster, +d.hdbscan_cluster]
   };
 }
 
@@ -149,12 +154,18 @@ function filterAndDownsample() {
   const xField = getXAxisField();
   const yField = getYAxisField();
 
+  const includeSales = els.includeSales.checked;
+  let idx = 0
+  if (!includeSales) {
+    idx = 1;
+  }
+
   let df = raw;
-  if (category) df = df.filter((d) => d.category.localeCompare(category));
-  df = df.filter((d) => (Number.isFinite(getValue(d, xField)) && Number.isFinite(getValue(d, yField))));
+  if (category) df = df.filter((d) => d.category === category);
+  df = df.filter((d) => (Number.isFinite(getValue(d, xField, idx)) && Number.isFinite(getValue(d, yField, idx))));
 
   // Keep high-activity points first; if too many, sample the rest deterministically.
-  df = df.slice().sort((a, b) => (b.total_number - a.total_number) || (b.total_volume - a.total_volume));
+  df = df.slice().sort((a, b) => (b.total_number[idx] - a.total_number[idx]) || (b.total_volume[idx] - a.total_volume[idx]));
   
   if (df.length <= maxPoints) return df;
 
@@ -194,8 +205,14 @@ function buildScales() {
   const xField = getXAxisField();
   const yField = getYAxisField();
 
+  const includeSales = els.includeSales.checked;
+  let idx = 0
+  if (!includeSales) {
+    idx = 1;
+  }
+
   if (isNumericField(xField)) {
-    const xs = raw.map((d) => getValue(d, xField)).filter((v) => Number.isFinite(v));
+    const xs = raw.map((d) => getValue(d, xField, idx)).filter((v) => Number.isFinite(v));
     const xMin = d3.min(xs) ?? 0;
     const xMax = d3.max(xs) ?? 1;
     xScale = d3
@@ -213,7 +230,7 @@ function buildScales() {
   }
 
   if (isNumericField(yField)) {
-    const ys = raw.map((d) => getValue(d, yField)).filter((v) => Number.isFinite(v));
+    const ys = raw.map((d) => getValue(d, yField, idx)).filter((v) => Number.isFinite(v));
     const yMin = d3.min(ys) ?? 0;
     const yMax = d3.max(ys) ?? 1;
     yScale = d3
@@ -280,6 +297,12 @@ function renderPoints() {
   const xField = getXAxisField();
   const yField = getYAxisField();
 
+  const includeSales = els.includeSales.checked;
+  let idx = 0
+  if (!includeSales) {
+    idx = 1;
+  }
+
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   ctx.clearRect(0, 0, width, height);
 
@@ -325,7 +348,7 @@ function renderPoints() {
   }
 
   // Radius scaled by sqrt(volume) but clamped.
-  const vols = df.map((d) => (Number.isFinite(Math.exp(d.total_volume)) ? Math.exp(d.total_volume) : 0));
+  const vols = df.map((d) => (Number.isFinite(Math.exp(d.total_volume[idx])) ? Math.exp(d.total_volume[idx]) : 0));
   const vMax = Math.max(1, ...vols);
   const rScale = (v) => {
     const t = Math.sqrt(Math.max(0, v) / vMax);
@@ -335,13 +358,13 @@ function renderPoints() {
   // Render
   for (let i = 0; i < df.length; i++) {
     const d = df[i];
-    const x = xScale(getValue(d, xField));
-    const y = yScale(getValue(d, yField));
+    const x = xScale(getValue(d, xField, idx));
+    const y = yScale(getValue(d, yField, idx));
     if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
 
-    const r = rScale(d.total_volume);
+    const r = rScale(d.total_volume[idx]);
     ctx.beginPath();
-    ctx.fillStyle = clusterColor(d.kmeans);
+    ctx.fillStyle = clusterColor(d.kmeans[idx]);
     ctx.arc(x, y, r, 0, Math.PI * 2);
     ctx.fill();
 
