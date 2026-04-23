@@ -3,7 +3,7 @@
 // Canvas + D3 axes for large scatter.
 // Each point: trader×category.
 
-const DATA_URL = "../samples/clustered_traders.csv";
+const DATA_URL = "clustered_traders.csv";
 
 const KMEANS_NUM_CLUSTERS = 7;
 const DBSCAN_MAX_COLORS = 21;
