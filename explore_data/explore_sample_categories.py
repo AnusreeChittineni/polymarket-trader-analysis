@@ -10,7 +10,7 @@ def analyze_distribution():
         df = pd.read_csv(CSV_PATH)
         
         if 'category' not in df.columns:
-            print("❌ Error: 'category' column not found. Run the append script first!")
+            print("Error: 'category' column not found. Run the append script first!")
             return
 
         # 2. Calculate Counts and Percentages
