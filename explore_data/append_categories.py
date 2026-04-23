@@ -75,6 +75,45 @@ def run_transformation():
     # Execute and fetch to a dataframe
     df_final = con.execute(final_query).df()
 
+    print("Step 4: Creating updated_trader_stats.csv...")
+    
+    # 1. First, identify the "Primary Category" for each trader based on trade frequency
+    con.execute(f"""
+        CREATE OR REPLACE TABLE trader_category_mapping AS
+        WITH counts AS (
+            SELECT 
+                maker AS trader,
+                category,
+                COUNT(*) as cat_count
+            FROM ({final_query})
+            GROUP BY 1, 2
+        )
+        SELECT trader, category AS primary_category
+        FROM (
+            SELECT *, ROW_NUMBER() OVER(PARTITION BY trader ORDER BY cat_count DESC) as r
+            FROM counts
+        ) WHERE r = 1
+    """)
+
+    # 2. Join this category onto your existing trader_stats.csv
+    # We use read_csv_auto to pull in the existing stats you already have
+    trader_stats_path = str(SCRIPT_DIR.parent / "samples" / "trader_stats.csv").replace("\\", "/")
+    
+    con.execute(f"""
+        CREATE OR REPLACE TABLE updated_stats AS
+        SELECT 
+            m.primary_category,
+            s.*
+        FROM read_csv_auto('{trader_stats_path}') s
+        LEFT JOIN trader_category_mapping m ON s.trader = m.trader
+    """)
+
+    # 3. Export the final result
+    UPDATED_STATS_OUTPUT = str(SCRIPT_DIR.parent / "samples" / "updated_trader_stats.csv").replace("\\", "/")
+    con.execute(f"COPY updated_stats TO '{UPDATED_STATS_OUTPUT}' (HEADER, DELIMITER ',')")
+
+    print(f"Successfully created: {UPDATED_STATS_OUTPUT}")
+
     print("Step 3: Exporting files...")
     # Export to Parquet
     df_final.to_parquet(OUTPUT_PARQUET, index=False)
