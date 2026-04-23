@@ -28,6 +28,3 @@ fig
 *.tar.zst
 output
 .tmp
-
-# sample data
-samples/*
