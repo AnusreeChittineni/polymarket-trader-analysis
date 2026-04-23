@@ -14,5 +14,7 @@ INSTALLATION:
 
 EXECUTION:
 
-- run frontend
-
+- Clone the repo: `git clone https://github.com/AnusreeChittineni/polymarket-trader-analysis`
+- cd into the repo: `cd polymarket-trader-analysis`
+- Start a server: `python -m http.server`
+- Visit the site: http://localhost:8000/viz/
