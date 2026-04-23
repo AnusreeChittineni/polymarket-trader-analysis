@@ -5,12 +5,31 @@
 
 const DATA_URL = "../samples/clustered_traders.csv";
 
-const num_clusters = 7
-const clusterColor = d3.scaleOrdinal()
-  .domain(d3.range(num_clusters))
-  .range(
-    d3.range(num_clusters).map(i => `hsl(${i * (360 / num_clusters)}, 70%, 55%)`)
-  );
+const KMEANS_NUM_CLUSTERS = 7;
+const DBSCAN_MAX_COLORS = 21;
+
+const kmeansClusterColor = d3
+  .scaleOrdinal()
+  .domain(d3.range(KMEANS_NUM_CLUSTERS))
+  .range(d3.range(KMEANS_NUM_CLUSTERS).map((i) => `hsl(${i * (360 / KMEANS_NUM_CLUSTERS)}, 70%, 55%)`));
+
+// DBSCAN/HDBSCAN can produce more clusters; cycle through a larger palette.
+const dbscanClusterColor = d3
+  .scaleOrdinal()
+  .domain(d3.range(DBSCAN_MAX_COLORS))
+  .range(d3.range(DBSCAN_MAX_COLORS).map((i) => `hsl(${i * (360 / DBSCAN_MAX_COLORS)}, 70%, 55%)`));
+
+function getClusterColor(label) {
+  const method = getClusterMethod();
+  // For DBSCAN-like methods, -1 often means "noise".
+  if (method === "dbscan" && label === -1) return "rgba(148, 163, 184, 0.9)";
+  if (method === "dbscan") {
+    // Keep colors stable even if labels are large/sparse.
+    const idx = ((label % DBSCAN_MAX_COLORS) + DBSCAN_MAX_COLORS) % DBSCAN_MAX_COLORS;
+    return dbscanClusterColor(idx);
+  }
+  return kmeansClusterColor(label);
+}
 
 const els = {
   canvas: document.getElementById("plot"),
@@ -243,7 +262,7 @@ function renderClusterInfoPanel() {
 
   rows.forEach((s, i) => {
     const y = startY + i * rowH;
-    const color = clusterColor(s.cluster);
+  const color = getClusterColor(s.cluster);
 
     svg
       .append("circle")
@@ -288,7 +307,7 @@ function renderLegend() {
 
   const rows = stats
     .map((s) => {
-      const color = clusterColor(s.cluster);
+  const color = getClusterColor(s.cluster);
       return `
         <div class="row">
           <div class="swatch" style="background:${color}"></div>
@@ -304,6 +323,23 @@ function renderLegend() {
   els.legend.innerHTML = `
     <h3>KMeans cluster legend</h3>
     <p class="sub">Archetypes are summarized from medians (${mode}).</p>
+    <details style="margin:10px 0 12px 0;">
+      <summary style="cursor:pointer; color:#cbd5e1;">Quick guide: best views & settings</summary>
+      <div class="sub" style="margin-top:8px; line-height:1.35;">
+        <div><b>Recommended axis combinations</b> (to see how clusters differ):</div>
+        <ul style="margin:6px 0 8px 18px; padding:0;">
+          <li><b>X:</b> Avg Odds vs <b>Y:</b> Avg Trade Size</li>
+          <li><b>X:</b> Win Rate vs <b>Y:</b> Avg Trade Size</li>
+          <li><b>X:</b> Avg Odds vs <b>Y:</b> Win Rate</li>
+        </ul>
+
+        <div style="margin-top:6px;"><b>Include sales</b>: counts both buys and sells when computing trade counts, volume, and averages.</div>
+        <div style="margin-top:4px;">Turning <b>Include sales</b> off (<i>ignore sales</i>) can help when you want to focus on <b>opening bets</b> (entries) rather than exits/position management, which can otherwise dominate activity metrics for some traders.</div>
+
+        <div style="margin-top:8px;"><b>KMeans vs DBSCAN</b>: KMeans tends to produce fewer, more stable clusters that are easier to interpret (the archetypes shown here).
+        DBSCAN/HDBSCAN can find <b>more specific groups</b> (more clusters), but the results are often less interpretable and may include a larger “noise” set.</div>
+      </div>
+    </details>
     ${rows}
   `;
 }
@@ -761,12 +797,10 @@ function renderPoints() {
     const r = rScale(d.total_volume[idx]);
     ctx.beginPath();
     const c = getClusterLabel(d, idx);
-    // For DBSCAN-like methods, -1 often means noise.
-    if (method === "dbscan" && c === -1) {
-      ctx.fillStyle = `rgba(148, 163, 184, ${alpha})`; // slate-ish for noise
-    } else {
-      ctx.fillStyle = clusterColor(c);
-    }
+    const col = getClusterColor(c);
+    ctx.fillStyle = (method === "dbscan" && c === -1)
+      ? `rgba(148, 163, 184, ${alpha})`
+      : col;
     ctx.arc(x, y, r, 0, Math.PI * 2);
     ctx.fill();
 
