@@ -1,0 +1,8 @@
+# CSE 6242 Polymarket Trader Analysis
+
+DESCRIPTION:
+
+INSTALLATION:
+
+EXECUTION:
+
