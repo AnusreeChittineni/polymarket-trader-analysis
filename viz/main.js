@@ -16,6 +16,8 @@ const els = {
   canvas: document.getElementById("plot"),
   svg: document.getElementById("axes"),
   tooltip: document.getElementById("tooltip"),
+  legend: document.getElementById("legend"),
+  clusterInfo: document.getElementById("clusterInfo"),
   status: document.getElementById("status"),
   xAxis: document.getElementById("xAxis"),
   yAxis: document.getElementById("yAxis"),
@@ -24,8 +26,10 @@ const els = {
   category: document.getElementById("category"),
   pointAlpha: document.getElementById("pointAlpha"),
   includeSales: document.getElementById("includeSales"),
+  clusterMethod: document.getElementById("clusterMethod"),
   reload: document.getElementById("reload"),
   viz: document.getElementById("viz"),
+  plotWrap: document.getElementById("plotWrap"),
 };
 
 const DPR = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
@@ -35,7 +39,264 @@ const margin = { top: 14, right: 18, bottom: 42, left: 56 };
 let raw = [];
 let categoriesAll = [];
 let xScale, yScale;
+let xIsLog = false;
+let yIsLog = false;
 let points = []; // points with screen coords for hit-testing
+let hovered = null; // { x, y, r, d }
+
+function clearHover() {
+  hovered = null;
+  els.tooltip.style.display = "none";
+}
+
+function fmt(n, digits = 0) {
+  if (!Number.isFinite(n)) return "";
+  return n.toLocaleString(undefined, {
+    maximumFractionDigits: digits,
+    minimumFractionDigits: digits,
+  });
+}
+
+function median(arr) {
+  const xs = arr.filter((v) => Number.isFinite(v)).slice().sort((a, b) => a - b);
+  if (!xs.length) return NaN;
+  const mid = Math.floor(xs.length / 2);
+  return xs.length % 2 ? xs[mid] : (xs[mid - 1] + xs[mid]) / 2;
+}
+
+function buildKMeansLegendStats() {
+  // Use the same include/exclude sales mode as the plot.
+  const idx = els.includeSales.checked ? 0 : 1;
+
+  const by = new Map();
+  for (const d of raw) {
+    const c = d.kmeans?.[idx];
+    if (!Number.isFinite(c)) continue;
+    if (!by.has(c)) by.set(c, []);
+    by.get(c).push(d);
+  }
+
+  const clusters = [...by.keys()].sort((a, b) => a - b);
+  const stats = clusters.map((c) => {
+    const g = by.get(c);
+    const win = median(g.map((d) => d.win_rate?.[idx]));
+    const trades = median(g.map((d) => Math.exp(d.total_number?.[idx] ?? NaN)));
+    const avgSize = median(g.map((d) => Math.exp(d.avg_size?.[idx] ?? NaN)));
+    const ppt = median(g.map((d) => d.profit_per_trade?.[idx]));
+    const odds = median(g.map((d) => d.avg_odds?.[idx]));
+
+    return {
+      cluster: c,
+      n: g.length,
+      win,
+      trades,
+      avgSize,
+      ppt,
+      odds,
+    };
+  });
+
+  // Compute percentile ranks (0-1) within the clusters for readable naming.
+  const rankOf = (key) => {
+    const xs = stats.map((s) => s[key]);
+    const sorted = xs.slice().sort((a, b) => a - b);
+    return (v) => {
+      if (!Number.isFinite(v)) return 0.5;
+      // rank by position in sorted list
+      const i = sorted.findIndex((x) => x >= v);
+      const j = i === -1 ? sorted.length - 1 : i;
+      return sorted.length <= 1 ? 1 : j / (sorted.length - 1);
+    };
+  };
+
+  const rWin = rankOf("win");
+  const rTrades = rankOf("trades");
+  const rSize = rankOf("avgSize");
+  const rPpt = rankOf("ppt");
+  const rOdds = rankOf("odds");
+
+  for (const s of stats) {
+    s.ranks = {
+      win: rWin(s.win),
+      trades: rTrades(s.trades),
+      size: rSize(s.avgSize),
+      ppt: rPpt(s.ppt),
+      odds: rOdds(s.odds),
+    };
+
+    // Heuristic archetype naming.
+    const tags = [];
+    if (s.ranks.win >= 0.8) tags.push("high win-rate");
+    else if (s.ranks.win <= 0.2) tags.push("low win-rate");
+
+    if (s.ranks.trades >= 0.8) tags.push("very active");
+    else if (s.ranks.trades <= 0.2) tags.push("low activity");
+
+    if (s.ranks.size >= 0.8) tags.push("large trades");
+    else if (s.ranks.size <= 0.2) tags.push("small trades");
+
+    if (s.ranks.odds >= 0.8) tags.push("longshot-leaning");
+    else if (s.ranks.odds <= 0.2) tags.push("favorites-leaning");
+
+    if (s.ranks.ppt >= 0.8) tags.push("profitable per trade");
+    else if (s.ranks.ppt <= 0.2) tags.push("unprofitable per trade");
+
+  // Make a short 2–3 tag title.
+  const title = tags.slice(0, 3).join(" · ") || "mixed";
+
+  // Friendly, stable-ish archetype name derived from cluster medians.
+  // (Heuristic, but more readable than "Cluster N".)
+  let name = "Mixed";
+  if (s.ranks.size >= 0.85 && s.ranks.trades >= 0.65) name = "Whales";
+  else if (s.ranks.trades >= 0.85 && s.ranks.size <= 0.45) name = "Grinders";
+  else if (s.ranks.trades <= 0.25 && s.ranks.size <= 0.35) name = "Dabblers";
+  else if (s.ranks.win >= 0.80 && s.ranks.ppt >= 0.65) name = "Good Traders";
+  else if (s.ranks.win <= 0.20 && s.ranks.ppt <= 0.35) name = "Bad Traders";
+  else if (s.ranks.odds >= 0.85) name = "Longshot Bettors";
+  else if (s.ranks.odds <= 0.15) name = "Favorites Bettors";
+
+  // Clearer, sentence-like characterization.
+  const activityWord = s.ranks.trades >= 0.75 ? "high" : s.ranks.trades <= 0.25 ? "low" : "moderate";
+  const sizeWord = s.ranks.size >= 0.75 ? "large" : s.ranks.size <= 0.25 ? "small" : "medium";
+  const winWord = s.ranks.win >= 0.75 ? "above-average" : s.ranks.win <= 0.25 ? "below-average" : "mixed";
+  const pptWord = s.ranks.ppt >= 0.75 ? "strong" : s.ranks.ppt <= 0.25 ? "weak" : "mixed";
+  const tiltWord = s.ranks.odds >= 0.75 ? "leans longshots" : s.ranks.odds <= 0.25 ? "leans favorites" : "mixed odds";
+
+  const pretty = `${activityWord} activity, ${sizeWord} trades, ${tiltWord}; win rate ${winWord} with ${pptWord} profit per trade.`;
+
+  // Use tags as a short subtitle in the legend.
+  const subtitle = title;
+
+  s.name = name;
+  s.pretty = pretty;
+  s.title = `${name} (Cluster ${s.cluster})`;
+  s.subtitle = subtitle;
+  s.desc = `Traders: ${fmt(s.n)} · ${pretty}  Win rate: ${Number.isFinite(s.win) ? fmt(s.win, 3) : ""} · Trades/trader (median): ~${fmt(s.trades, 0)} · Avg size: ~${fmt(s.avgSize, 1)} · Profit/trade: ~${Number.isFinite(s.ppt) ? fmt(s.ppt, 3) : ""}`;
+  }
+
+  return stats;
+}
+
+function renderClusterInfoPanel() {
+  if (!els.clusterInfo) return;
+
+  const svg = d3.select(els.clusterInfo);
+  svg.selectAll("*").remove();
+
+  const method = getClusterMethod();
+  if (method !== "kmeans") {
+    const w = els.clusterInfo.clientWidth || els.clusterInfo.getBoundingClientRect().width || 600;
+    const h = els.clusterInfo.clientHeight || els.clusterInfo.getBoundingClientRect().height || 140;
+    svg
+      .attr("width", w)
+      .attr("height", h);
+    svg
+      .append("text")
+      .attr("x", 12)
+      .attr("y", 20)
+      .attr("class", "sub")
+      .text("Cluster descriptions are shown for KMeans mode.");
+    return;
+  }
+
+  const stats = buildKMeansLegendStats();
+  const w = els.clusterInfo.clientWidth || els.clusterInfo.getBoundingClientRect().width || 600;
+  const h = els.clusterInfo.clientHeight || els.clusterInfo.getBoundingClientRect().height || 140;
+  svg
+    .attr("width", w)
+    .attr("height", h);
+
+  svg
+    .append("text")
+    .attr("x", 12)
+    .attr("y", 18)
+    .attr("class", "sub")
+    .text("Each line: archetype name + plain-English characterization.");
+
+  const rowH = 24;
+  const startY = 44;
+  const maxRows = Math.floor((h - startY - 10) / rowH);
+  /*const rows = stats.slice(0, Math.max(0, maxRows));*/
+  const rows = stats;
+
+  rows.forEach((s, i) => {
+    const y = startY + i * rowH;
+    const color = clusterColor(s.cluster);
+
+    svg
+      .append("circle")
+      .attr("class", "sw")
+      .attr("cx", 16)
+      .attr("cy", y - 4)
+      .attr("r", 5)
+      .attr("fill", color);
+
+  const label = `${s.name}: ${s.pretty}`;
+    svg
+      .append("text")
+      .attr("x", 28)
+      .attr("y", y)
+      .text(label);
+  });
+
+  if (stats.length > rows.length) {
+    svg
+      .append("text")
+      .attr("x", 12)
+      .attr("y", h - 10)
+      .attr("class", "sub")
+      .text(`Showing ${rows.length}/${stats.length} clusters (panel height limited).`);
+  }
+}
+
+function renderLegend() {
+  if (!els.legend) return;
+
+  const method = getClusterMethod();
+  if (method !== "kmeans") {
+    els.legend.innerHTML = `
+      <h3>Cluster legend</h3>
+      <p class="sub">Switch to KMeans to see cluster archetype descriptions.</p>
+    `;
+    return;
+  }
+
+  const stats = buildKMeansLegendStats();
+  const mode = els.includeSales.checked ? "including sales" : "excluding sales";
+
+  const rows = stats
+    .map((s) => {
+      const color = clusterColor(s.cluster);
+      return `
+        <div class="row">
+          <div class="swatch" style="background:${color}"></div>
+          <div>
+            <div class="title">${s.title}</div>
+            <div class="desc">${s.desc}</div>
+          </div>
+        </div>
+      `;
+    })
+    .join("");
+
+  els.legend.innerHTML = `
+    <h3>KMeans cluster legend</h3>
+    <p class="sub">Archetypes are summarized from medians (${mode}).</p>
+    ${rows}
+  `;
+}
+
+const CATEGORY_ORDER = ["Pop Culture", "Crypto", "Economics", "Other/Misc", "Politics", "Sports"];
+
+function getClusterMethod() {
+  return (els.clusterMethod && els.clusterMethod.value) || "kmeans";
+}
+
+function getClusterLabel(d, idx) {
+  const method = getClusterMethod();
+  if (method === "dbscan") return d.dbscan[idx];
+  return d.kmeans[idx];
+}
 
 function getXAxisField() {
   return (els.xAxis && els.xAxis.value) || "tsne_1";
@@ -79,7 +340,8 @@ function setStatus(msg) {
 }
 
 function resize() {
-  const rect = els.viz.getBoundingClientRect();
+  const target = els.plotWrap || els.viz;
+  const rect = target.getBoundingClientRect();
   const width = Math.max(10, rect.width);
   const height = Math.max(10, rect.height);
 
@@ -95,26 +357,23 @@ function resize() {
     buildScales();
     renderAxes();
     renderPoints();
+  renderLegend();
+  renderClusterInfoPanel();
   }
 }
 
 function parseRow(d) {
 
-  let category = "";
+  // d3.csv returns strings by default; normalize booleans safely.
+  const asBool = (v) => v === true || v === "True" || v === "true" || v === 1 || v === "1";
 
-  if (d.category_Crypto === true) {
-    category = "Crypto";
-  } else if (d.category_Economics === true) {
-    category = "Economics";
-  } else if (d.category_Other_Misc === true) {
-    category = "Other/Misc";
-  } else if (d.category_Politics === true) {
-    category = "Politics";
-  } else if (d.category_Sports === true) {
-    category = "Sports";
-  } else {
-    category = "Pop Culture";
-  }
+  let category = "Pop Culture";
+  if (asBool(d.category_Crypto)) category = "Crypto";
+  else if (asBool(d.category_Economics)) category = "Economics";
+  else if (asBool(d.category_Other_Misc)) category = "Other/Misc";
+  else if (asBool(d.category_Politics)) category = "Politics";
+  else if (asBool(d.category_Sports)) category = "Sports";
+  else if (asBool(d.category_Pop_Culture)) category = "Pop Culture";
 
   // index 0 is value including sales, index 1 is value excluding sales
   return {
@@ -128,6 +387,15 @@ function parseRow(d) {
     avg_odds: [+d.avg_odds, +d.avg_odds_ignore_sales],
     profit_per_trade: [+d.profit_per_trade, +d.profit_per_trade_ignore_sales],
     category: [category, category],
+    // Keep raw one-hot flags so filtering can be done exactly on them.
+    category_flags: {
+      Crypto: asBool(d.category_Crypto),
+      Economics: asBool(d.category_Economics),
+      "Other/Misc": asBool(d.category_Other_Misc),
+      Politics: asBool(d.category_Politics),
+      "Pop Culture": asBool(d.category_Pop_Culture),
+      Sports: asBool(d.category_Sports),
+    },
     tsne_1: [+d.tsne_1, +d.tsne_1],
     tsne_2: [+d.tsne_2, +d.tsne_2],
     kmeans: [+d.kmeans_cluster, +d.kmeans_cluster],
@@ -146,9 +414,15 @@ function populateCategoryDropdown() {
   }
 }
 
+function getCategoryValue(d, idx) {
+  // Current parseRow stores category as [includingSales, excludingSales] but the label is the same in both.
+  if (Array.isArray(d.category)) return d.category[idx] ?? d.category[0];
+  return d.category;
+}
+
 function filterAndDownsample() {
-  const maxPoints = Math.max(1000, Math.min(200000, parseInt(els.maxPoints.value, 10) || 50000));
-  const minPos = Math.max(1, parseInt(els.minPositions.value, 10) || 1);
+  const maxPoints = Math.max(1000, Math.min(5000, parseInt(els.maxPoints.value, 10) || 5000));
+  const minTrades = Math.max(1, parseInt(els.minPositions.value, 10) || 1);
   const category = els.category.value;
 
   const xField = getXAxisField();
@@ -161,7 +435,19 @@ function filterAndDownsample() {
   }
 
   let df = raw;
-  if (category) df = df.filter((d) => d.category === category);
+  if (category) {
+    df = df.filter((d) => d.category_flags && d.category_flags[category] === true);
+  }
+
+  // Minimum trade-count filter. NOTE: parseRow stores `total_number` as log(total_trade_number),
+  // so we compare against exp(total_number).
+  df = df.filter((d) => {
+    const v = d.total_number?.[idx];
+    if (!Number.isFinite(v)) return false;
+    const n = Math.exp(v);
+    return Number.isFinite(n) && n >= minTrades;
+  });
+
   df = df.filter((d) => (Number.isFinite(getValue(d, xField, idx)) && Number.isFinite(getValue(d, yField, idx))));
 
   // Keep high-activity points first; if too many, sample the rest deterministically.
@@ -196,7 +482,8 @@ function sampleDeterministic(arr, k, seed) {
 }
 
 function buildScales() {
-  const rect = els.viz.getBoundingClientRect();
+  const target = els.plotWrap || els.viz;
+  const rect = target.getBoundingClientRect();
   const width = rect.width;
   const height = rect.height;
   const innerW = Math.max(10, width - margin.left - margin.right);
@@ -211,17 +498,49 @@ function buildScales() {
     idx = 1;
   }
 
+  // Auto log-scale heuristic:
+  // - only for numeric fields
+  // - only when all values are > 0
+  // - only when range ratio is very large (e.g., 1..2000 compared to 1..20)
+  // - never for t-SNE coordinates (they include negatives and are already visually meaningful).
+  const LOG_RATIO_THRESHOLD = 50;
+  const shouldUseLogScale = (field, values) => {
+    if (!isNumericField(field)) return false;
+    if (field === "tsne_1" || field === "tsne_2") return false;
+  // Avg odds is naturally bounded (0–1-ish), so log scaling isn't helpful.
+  if (field === "avg_odds") return false;
+    const xs = values.filter((v) => Number.isFinite(v));
+    if (!xs.length) return false;
+    const minV = d3.min(xs);
+    const maxV = d3.max(xs);
+    if (!Number.isFinite(minV) || !Number.isFinite(maxV)) return false;
+    if (minV <= 0) return false; // log requires positives
+    if (maxV <= 0) return false;
+    const ratio = maxV / minV;
+    return Number.isFinite(ratio) && ratio >= LOG_RATIO_THRESHOLD;
+  };
+
   if (isNumericField(xField)) {
     const xs = raw.map((d) => getValue(d, xField, idx)).filter((v) => Number.isFinite(v));
     const xMin = d3.min(xs) ?? 0;
     const xMax = d3.max(xs) ?? 1;
-    xScale = d3
-      .scaleLinear()
-      .domain([xMin, xMax])
-      .nice()
-      .range([margin.left, margin.left + innerW]);
+    xIsLog = shouldUseLogScale(xField, xs);
+    if (xIsLog) {
+      xScale = d3
+        .scaleLog()
+        .domain([Math.max(xMin, 1e-12), xMax])
+        .nice()
+        .range([margin.left, margin.left + innerW]);
+    } else {
+      xScale = d3
+        .scaleLinear()
+        .domain([xMin, xMax])
+        .nice()
+        .range([margin.left, margin.left + innerW]);
+    }
   } else {
     // x is categorical. Use all categories so axis doesn't jump when filtering.
+    xIsLog = false;
     xScale = d3
       .scalePoint()
       .domain(categoriesAll)
@@ -233,11 +552,20 @@ function buildScales() {
     const ys = raw.map((d) => getValue(d, yField, idx)).filter((v) => Number.isFinite(v));
     const yMin = d3.min(ys) ?? 0;
     const yMax = d3.max(ys) ?? 1;
-    yScale = d3
-      .scaleLinear()
-      .domain([yMin, yMax])
-      .nice()
-      .range([margin.top + innerH, margin.top]);
+    yIsLog = shouldUseLogScale(yField, ys);
+    if (yIsLog) {
+      yScale = d3
+        .scaleLog()
+        .domain([Math.max(yMin, 1e-12), yMax])
+        .nice()
+        .range([margin.top + innerH, margin.top]);
+    } else {
+      yScale = d3
+        .scaleLinear()
+        .domain([yMin, yMax])
+        .nice()
+        .range([margin.top + innerH, margin.top]);
+    }
   }
 }
 
@@ -248,10 +576,32 @@ function renderAxes() {
   const xField = getXAxisField();
   const yField = getYAxisField();
 
-  const xAxis = isNumericField(xField) ? d3.axisBottom(xScale).ticks(10) : d3.axisBottom(xScale);
-  const yAxis = d3.axisLeft(yScale).ticks(8);
+  const prettyAxisLabel = (field) => {
+    const map = {
+      tsne_1: "t-SNE 1",
+      tsne_2: "t-SNE 2",
+      win_rate: "Win Rate",
+      avg_trade_size: "Avg Trade Size",
+      total_trade_volume: "Total Trade Volume",
+      total_trade_number: "Total Trade Number",
+      frequency: "Frequency",
+      net_gains: "Net Gains",
+      avg_odds: "Avg Odds",
+      profit_per_trade: "Profit per Trade",
+    };
+    return map[field] || field
+      .split("_")
+      .map((w) => (w ? w[0].toUpperCase() + w.slice(1) : w))
+      .join(" ");
+  };
 
-  const rect = els.viz.getBoundingClientRect();
+  const xAxis = isNumericField(xField)
+    ? (xIsLog ? d3.axisBottom(xScale).ticks(10, "~s") : d3.axisBottom(xScale).ticks(10))
+    : d3.axisBottom(xScale);
+  const yAxis = yIsLog ? d3.axisLeft(yScale).ticks(8, "~s") : d3.axisLeft(yScale).ticks(8);
+
+  const target = els.plotWrap || els.viz;
+  const rect = target.getBoundingClientRect();
   const width = rect.width;
   const height = rect.height;
 
@@ -276,7 +626,7 @@ function renderAxes() {
     .attr("y", height - 5)
     .attr("text-anchor", "middle")
     .attr("fill", "#cbd5e1")
-    .text(xField);
+  .text(`${prettyAxisLabel(xField)}${xIsLog ? " (log)" : ""}`);
 
   svg
     .append("text")
@@ -285,12 +635,13 @@ function renderAxes() {
     .attr("y", 15)
     .attr("text-anchor", "middle")
     .attr("fill", "#cbd5e1")
-    .text(yField);
+  .text(`${prettyAxisLabel(yField)}${yIsLog ? " (log)" : ""}`);
 }
 
 function renderPoints() {
   const ctx = els.canvas.getContext("2d");
-  const rect = els.viz.getBoundingClientRect();
+  const target = els.plotWrap || els.viz;
+  const rect = target.getBoundingClientRect();
   const width = rect.width;
   const height = rect.height;
 
@@ -332,8 +683,8 @@ function renderPoints() {
   const df = filterAndDownsample();
   setStatus(`Rendering ${df.length.toLocaleString()} points…`);
 
-  // Build screen coords for hit testing.
-  points = new Array(df.length);
+  // Build screen coords for hit-testing (ONLY for points that were actually drawn).
+  points = [];
 
   // Encode win in color via a simple blue->green gradient.
   function colorForWin(w) {
@@ -355,6 +706,8 @@ function renderPoints() {
     return 2 + 6 * t;
   };
 
+  const method = getClusterMethod();
+
   // Render
   for (let i = 0; i < df.length; i++) {
     const d = df[i];
@@ -364,14 +717,68 @@ function renderPoints() {
 
     const r = rScale(d.total_volume[idx]);
     ctx.beginPath();
-    ctx.fillStyle = clusterColor(d.kmeans[idx]);
+    const c = getClusterLabel(d, idx);
+    // For DBSCAN-like methods, -1 often means noise.
+    if (method === "dbscan" && c === -1) {
+      ctx.fillStyle = `rgba(148, 163, 184, ${alpha})`; // slate-ish for noise
+    } else {
+      ctx.fillStyle = clusterColor(c);
+    }
     ctx.arc(x, y, r, 0, Math.PI * 2);
     ctx.fill();
 
-    points[i] = { x, y, r, d };
+    points.push({ x, y, r, d });
+  }
+
+  // Draw hover highlight last so it sits above all points.
+  if (hovered && Number.isFinite(hovered.x) && Number.isFinite(hovered.y)) {
+    // If the hovered point isn't in the currently-rendered points, drop it.
+    // This prevents stale hover state after filtering/axis changes.
+    const stillVisible = points.some((p) => p.d === hovered.d);
+    if (!stillVisible) {
+      clearHover();
+      setStatus(`Showing ${df.length.toLocaleString()} points`);
+      return;
+    }
+
+    ctx.save();
+    // Outer glow
+    ctx.globalCompositeOperation = "lighter";
+    ctx.shadowColor = "rgba(99, 102, 241, 0.95)"; // indigo-ish
+    ctx.shadowBlur = 14;
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "rgba(167, 139, 250, 0.95)";
+    ctx.beginPath();
+    ctx.arc(hovered.x, hovered.y, Math.max(4.5, hovered.r + 2.5), 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Crisp inner ring
+    ctx.shadowBlur = 0;
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = "rgba(255,255,255,0.9)";
+    ctx.beginPath();
+    ctx.arc(hovered.x, hovered.y, Math.max(3.5, hovered.r + 1.2), 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
   }
 
   setStatus(`Showing ${df.length.toLocaleString()} points`);
+}
+
+function formatNumber(n, digits = 0) {
+  if (!Number.isFinite(n)) return "";
+  return n.toLocaleString(undefined, {
+    maximumFractionDigits: digits,
+    minimumFractionDigits: digits,
+  });
+}
+
+function formatMaybeExp(v, digits = 0) {
+  // Some fields are stored as log(value). If v looks invalid, return blank.
+  if (!Number.isFinite(v)) return "";
+  const n = Math.exp(v);
+  if (!Number.isFinite(n)) return "";
+  return formatNumber(n, digits);
 }
 
 function nearestPoint(mx, my) {
@@ -383,7 +790,12 @@ function nearestPoint(mx, my) {
     const dx = mx - p.x;
     const dy = my - p.y;
     const dist2 = dx * dx + dy * dy;
-    const hitR = Math.max(4, p.r + 2);
+
+    // More forgiving radius so it feels consistent even for small points.
+    // Important: mouse coordinates and stored points are both in CSS pixels
+    // (we scale the canvas with DPR but draw in CSS px after setTransform).
+    const hitR = Math.max(8, p.r + 6);
+
     if (dist2 <= hitR * hitR && dist2 < bestDist2) {
       bestDist2 = dist2;
       best = p;
@@ -397,26 +809,83 @@ function onMove(evt) {
   if (hoverRaf) return;
   hoverRaf = requestAnimationFrame(() => {
     hoverRaf = null;
-    const rect = els.viz.getBoundingClientRect();
-    const mx = evt.clientX - rect.left;
-    const my = evt.clientY - rect.top;
+
+  // Use canvas-local coordinates for the actual hit-test.
+  // This keeps the selection aligned with the cursor tip (and avoids any offset
+  // introduced by layout/padding/inset).
+  const mx = evt.offsetX;
+  const my = evt.offsetY;
+
+  // We still need plot-local coords for tooltip positioning.
+  const rect = (els.plotWrap || els.viz).getBoundingClientRect();
     const p = nearestPoint(mx, my);
 
     if (!p) {
-      els.tooltip.style.display = "none";
+  const hadHover = !!hovered;
+  clearHover();
+  // Only redraw if we were previously hovering a point.
+  if (hadHover) renderPoints();
       return;
     }
 
-    const { trader, win_rate, total_number, total_volume } = p.d;
+    // If the hovered point didn't actually change, don't force a repaint.
+    if (hovered?.d !== p.d) {
+      hovered = p;
+      renderPoints();
+    }
+
+    const includeSales = els.includeSales.checked;
+    const idx = includeSales ? 0 : 1;
+
+    const d = p.d;
+    const trader = Array.isArray(d.trader) ? (d.trader[idx] ?? d.trader[0]) : d.trader;
+    const category = getCategoryValue(d, idx);
+
+    const winRate = d.win_rate?.[idx];
+    const totalTrades = formatMaybeExp(d.total_number?.[idx], 0);
+    const avgTradeSize = formatMaybeExp(d.avg_size?.[idx], 2);
+    const profitPerTrade = d.profit_per_trade?.[idx];
+
     els.tooltip.innerHTML = `
       <div class="mono"><b>${trader}</b></div>
-      <div>Win Rate: <b>${win_rate.toFixed(4)}</b></div>
-      <div>Total Trade Number: <b>${Number.isFinite(total_number) ? Math.round(total_number).toLocaleString() : ""}</b></div>
-      <div>Total Volume: <b>${Math.round(total_volume).toLocaleString()}</b></div>
-    `;
-    els.tooltip.style.left = `${mx}px`;
-    els.tooltip.style.top = `${my}px`;
-    els.tooltip.style.display = "block";
+      <div>Category: <b>${category || ""}</b></div>
+      <div>Win rate: <b>${Number.isFinite(winRate) ? formatNumber(winRate, 4) : ""}</b></div>
+      <div>Total trades: <b>${totalTrades}</b></div>
+      <div>Avg trade size: <b>${avgTradeSize}</b></div>
+      <div>Profit / trade: <b>${Number.isFinite(profitPerTrade) ? formatNumber(profitPerTrade, 4) : ""}</b></div>
+  `;
+
+  // Position tooltip near the hovered dot. If the dot is near the right edge,
+  // flip the tooltip to the *left* so it doesn't hide behind the legend panel.
+  // (Tooltip is absolutely positioned inside #plotWrap.)
+  const wrap = els.plotWrap || els.viz;
+  const w = Math.max(1, wrap.clientWidth || wrap.getBoundingClientRect().width);
+  const h = Math.max(1, wrap.clientHeight || wrap.getBoundingClientRect().height);
+
+  // Measure after setting innerHTML so we can clamp correctly.
+  els.tooltip.style.display = "block";
+  const tipW = els.tooltip.offsetWidth || 280;
+  const tipH = els.tooltip.offsetHeight || 120;
+
+  const pad = 8;
+  const dx = 10;
+  const dy = 10;
+
+  // Use point coordinates if available; fall back to mouse.
+  const px = Number.isFinite(p.x) ? p.x : mx;
+  const py = Number.isFinite(p.y) ? p.y : my;
+
+  // If the tooltip would run off the right edge, flip to left.
+  const wouldOverflowRight = px + dx + tipW + pad > w;
+  let left = wouldOverflowRight ? px - dx - tipW : px + dx;
+  let top = py + dy;
+
+  // Clamp within plot wrap bounds.
+  left = Math.max(pad, Math.min(w - tipW - pad, left));
+  top = Math.max(pad, Math.min(h - tipH - pad, top));
+
+  els.tooltip.style.left = `${left}px`;
+  els.tooltip.style.top = `${top}px`;
   });
 }
 
@@ -427,33 +896,76 @@ async function loadData() {
   const df = await d3.csv(DATA_URL, parseRow);
 
   raw = df;
-  // categoriesAll = Array.from(new Set(raw.map((d) => d.category))).sort();
-  categoriesAll = ["Crypto", "Economics", "Politics", "Pop Culture", "Sports", "Other/Misc"]
+  // Always offer the full set of categories (even if the current dataset slice is skewed).
+  categoriesAll = CATEGORY_ORDER.slice();
   populateCategoryDropdown();
 
   buildScales();
   renderAxes();
   renderPoints();
+  renderLegend();
+  renderClusterInfoPanel();
 }
 
 els.reload.addEventListener("click", () => {
+  clearHover();
   buildScales();
   renderAxes();
   renderPoints();
+  renderLegend();
+  renderClusterInfoPanel();
 });
+
+if (els.clusterMethod) {
+  els.clusterMethod.addEventListener("change", () => {
+  clearHover();
+    rerender();
+  renderLegend();
+  renderClusterInfoPanel();
+  });
+}
+
+if (els.category) {
+  els.category.addEventListener("change", () => {
+  clearHover();
+    rerender();
+  });
+}
 
 if (els.xAxis) {
   els.xAxis.addEventListener("change", () => {
+  clearHover();
     buildScales();
     renderAxes();
     renderPoints();
+  renderLegend();
+  });
+}
+
+if (els.yAxis) {
+  els.yAxis.addEventListener("change", () => {
+  clearHover();
+    buildScales();
+    renderAxes();
+    renderPoints();
+    renderLegend();
+  });
+}
+
+if (els.includeSales) {
+  els.includeSales.addEventListener("change", () => {
+    clearHover();
+    rerender();
+    renderLegend();
   });
 }
 
 window.addEventListener("resize", resize);
 els.canvas.addEventListener("mousemove", onMove);
 els.canvas.addEventListener("mouseleave", () => {
-  els.tooltip.style.display = "none";
+  const hadHover = !!hovered;
+  clearHover();
+  if (hadHover) renderPoints();
 });
 
 resize();

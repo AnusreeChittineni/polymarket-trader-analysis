@@ -20,7 +20,17 @@ from pathlib import Path
 
 
 def main() -> None:
-    port = int(sys.argv[1]) if len(sys.argv) > 1 else 8000
+    # Support both:
+    #   python scripts/serve_viz.py
+    #   python scripts/serve_viz.py 8015
+    # NOTE: Some runners may pass additional args; take the first int-like arg.
+    port = 8000
+    for arg in sys.argv[1:]:
+        try:
+            port = int(arg)
+            break
+        except ValueError:
+            continue
     repo_root = Path(__file__).resolve().parents[1]
 
     os.chdir(repo_root)
