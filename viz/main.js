@@ -863,6 +863,28 @@ function formatMaybeExp(v, digits = 0) {
   return formatNumber(n, digits);
 }
 
+function tooltipHtmlForDatum(d, idx) {
+  const trader = Array.isArray(d.trader) ? (d.trader[idx] ?? d.trader[0]) : d.trader;
+  const category = getCategoryValue(d, idx);
+
+  const winRate = d.win_rate?.[idx];
+  const totalTrades = formatMaybeExp(d.total_number?.[idx], 0);
+  const avgTradeSize = formatMaybeExp(d.avg_size?.[idx], 2);
+
+  const netGains = d.net_gain?.[idx];
+  const profitPerTrade = d.profit_per_trade?.[idx];
+
+  return `
+      <div class="mono"><b>${trader}</b></div>
+      <div>Category: <b>${category || ""}</b></div>
+      <div>Win rate: <b>${Number.isFinite(winRate) ? formatNumber(winRate, 4) : ""}</b></div>
+      <div>Total trades: <b>${totalTrades}</b></div>
+      <div>Avg trade size: <b>${avgTradeSize}</b></div>
+      <div>Net gains/loss: <b>${Number.isFinite(netGains) ? formatNumber(netGains, 4) : ""}</b></div>
+      <div>Profit / trade: <b>${Number.isFinite(profitPerTrade) ? formatNumber(profitPerTrade, 4) : ""}</b></div>
+  `;
+}
+
 function nearestPoint(mx, my) {
   // Brute-force is fine for 50k with throttling.
   let best = null;
@@ -920,22 +942,7 @@ function onMove(evt) {
     const idx = includeSales ? 0 : 1;
 
     const d = p.d;
-    const trader = Array.isArray(d.trader) ? (d.trader[idx] ?? d.trader[0]) : d.trader;
-    const category = getCategoryValue(d, idx);
-
-    const winRate = d.win_rate?.[idx];
-    const totalTrades = formatMaybeExp(d.total_number?.[idx], 0);
-    const avgTradeSize = formatMaybeExp(d.avg_size?.[idx], 2);
-    const profitPerTrade = d.profit_per_trade?.[idx];
-
-    els.tooltip.innerHTML = `
-      <div class="mono"><b>${trader}</b></div>
-      <div>Category: <b>${category || ""}</b></div>
-      <div>Win rate: <b>${Number.isFinite(winRate) ? formatNumber(winRate, 4) : ""}</b></div>
-      <div>Total trades: <b>${totalTrades}</b></div>
-      <div>Avg trade size: <b>${avgTradeSize}</b></div>
-      <div>Profit / trade: <b>${Number.isFinite(profitPerTrade) ? formatNumber(profitPerTrade, 4) : ""}</b></div>
-  `;
+  els.tooltip.innerHTML = tooltipHtmlForDatum(d, idx);
 
   // Position tooltip near the hovered dot. If the dot is near the right edge,
   // flip the tooltip to the *left* so it doesn't hide behind the legend panel.
@@ -1057,9 +1064,18 @@ if (els.yAxis) {
 
 if (els.includeSales) {
   els.includeSales.addEventListener("change", () => {
-    clearHover();
+    // Re-render points/scales and also refresh tooltip if we're currently hovering a dot.
+    // (Otherwise the tooltip could show values for the previous includeSales mode.)
     rerender();
     renderLegend();
+
+    if (hovered && hovered.d) {
+      const idx = els.includeSales.checked ? 0 : 1;
+      els.tooltip.innerHTML = tooltipHtmlForDatum(hovered.d, idx);
+      els.tooltip.style.display = "block";
+    } else {
+      clearHover();
+    }
   });
 }
 
