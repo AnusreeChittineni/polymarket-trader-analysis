@@ -163,14 +163,28 @@ function buildKMeansLegendStats() {
   else if (s.ranks.odds >= 0.85) name = "Longshot Bettors";
   else if (s.ranks.odds <= 0.15) name = "Favorites Bettors";
 
+  // Manual overrides for specific cluster labels to match the narrative.
+  if (s.cluster === 3) name = "Bonders";
+  if (s.cluster === 5) name = "Suspiciously Good Traders";
+  if (s.cluster === 1) name = "Average Traders";
+  if (s.cluster === 4) name = "Slightly Richer Average Traders";
+
   // Clearer, sentence-like characterization.
   const activityWord = s.ranks.trades >= 0.75 ? "high" : s.ranks.trades <= 0.25 ? "low" : "moderate";
   const sizeWord = s.ranks.size >= 0.75 ? "large" : s.ranks.size <= 0.25 ? "small" : "medium";
   const winWord = s.ranks.win >= 0.75 ? "above-average" : s.ranks.win <= 0.25 ? "below-average" : "mixed";
   const pptWord = s.ranks.ppt >= 0.75 ? "strong" : s.ranks.ppt <= 0.25 ? "weak" : "mixed";
-  const tiltWord = s.ranks.odds >= 0.75 ? "leans longshots" : "mixed odds";
+  const tiltWord = s.cluster === 3
+    ? "takes trades with safe odds"
+    : (s.ranks.odds >= 0.75 ? "leans longshots" : "mixed odds");
 
-  const pretty = `${activityWord} activity, ${sizeWord} trades, ${tiltWord}; win rate ${winWord} with ${pptWord} profit per trade.`;
+  const pretty = s.cluster === 5
+    ? "few trades, unusually high win rate, and high volume."
+    : s.cluster === 1
+      ? "medium traders taking smallish trades with average profits."
+      : s.cluster === 4
+        ? "medium traders with slightly more spending money on medium sized trades."
+        : `${activityWord} activity, ${sizeWord} trades, ${tiltWord}; win rate ${winWord} with ${pptWord} profit per trade.`;
 
   // Use tags as a short subtitle in the legend.
   const subtitle = title;
