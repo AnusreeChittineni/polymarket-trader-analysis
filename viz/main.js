@@ -338,6 +338,9 @@ function renderLegend() {
 
         <div style="margin-top:8px;"><b>KMeans vs DBSCAN</b>: KMeans tends to produce fewer, more stable clusters that are easier to interpret (the archetypes shown here).
         DBSCAN/HDBSCAN can find <b>more specific groups</b> (more clusters), but the results are often less interpretable and may include a larger “noise” set.</div>
+
+  <div style="margin-top:8px;"><b>Tip</b>: Click a point to open that trader’s Polymarket profile in a new tab.
+  Profiles follow <span class="mono">https://polymarket.com/profile/&lt;trader_id&gt;</span>, where <span class="mono">trader_id</span> comes from the CSV.</div>
       </div>
     </details>
     ${rows}
@@ -966,6 +969,27 @@ function onMove(evt) {
   });
 }
 
+function traderProfileUrl(traderId) {
+  if (!traderId) return null;
+  return `https://polymarket.com/profile/${encodeURIComponent(String(traderId))}`;
+}
+
+function onClick(evt) {
+  // Open the trader profile for the clicked point.
+  const mx = evt.offsetX;
+  const my = evt.offsetY;
+  const p = nearestPoint(mx, my);
+  if (!p || !p.d) return;
+
+  const includeSales = els.includeSales.checked;
+  const idx = includeSales ? 0 : 1;
+  const d = p.d;
+  const traderId = Array.isArray(d.trader) ? (d.trader[idx] ?? d.trader[0]) : d.trader;
+  const url = traderProfileUrl(traderId);
+  if (!url) return;
+  window.open(url, "_blank", "noopener,noreferrer");
+}
+
 async function loadData() {
   setStatus("Loading CSV…");
 
@@ -1039,6 +1063,7 @@ if (els.includeSales) {
 
 window.addEventListener("resize", resize);
 els.canvas.addEventListener("mousemove", onMove);
+els.canvas.addEventListener("click", onClick);
 els.canvas.addEventListener("mouseleave", () => {
   const hadHover = !!hovered;
   clearHover();
