@@ -41,8 +41,17 @@ let categoriesAll = [];
 let xScale, yScale;
 let xIsLog = false;
 let yIsLog = false;
+let xIsAsinh = false;
+let yIsAsinh = false;
 let points = []; // points with screen coords for hit-testing
 let hovered = null; // { x, y, r, d }
+
+function asinh(x) {
+  // Math.asinh exists in modern browsers; keep a safe fallback.
+  if (!Number.isFinite(x)) return NaN;
+  if (typeof Math.asinh === "function") return Math.asinh(x);
+  return Math.log(x + Math.sqrt(x * x + 1));
+}
 
 function clearHover() {
   hovered = null;
@@ -135,8 +144,7 @@ function buildKMeansLegendStats() {
     if (s.ranks.size >= 0.8) tags.push("large trades");
     else if (s.ranks.size <= 0.2) tags.push("small trades");
 
-    if (s.ranks.odds >= 0.8) tags.push("longshot-leaning");
-    else if (s.ranks.odds <= 0.2) tags.push("favorites-leaning");
+  if (s.ranks.odds >= 0.8) tags.push("longshot-leaning");
 
     if (s.ranks.ppt >= 0.8) tags.push("profitable per trade");
     else if (s.ranks.ppt <= 0.2) tags.push("unprofitable per trade");
@@ -149,7 +157,7 @@ function buildKMeansLegendStats() {
   let name = "Mixed";
   if (s.ranks.size >= 0.85 && s.ranks.trades >= 0.65) name = "Whales";
   else if (s.ranks.trades >= 0.85 && s.ranks.size <= 0.45) name = "Grinders";
-  else if (s.ranks.trades <= 0.25 && s.ranks.size <= 0.35) name = "Dabblers";
+  else if (s.ranks.trades <= 0.25 && s.ranks.size <= 0.35) name = "Gamblers";
   else if (s.ranks.win >= 0.80 && s.ranks.ppt >= 0.65) name = "Good Traders";
   else if (s.ranks.win <= 0.20 && s.ranks.ppt <= 0.35) name = "Bad Traders";
   else if (s.ranks.odds >= 0.85) name = "Longshot Bettors";
@@ -160,7 +168,7 @@ function buildKMeansLegendStats() {
   const sizeWord = s.ranks.size >= 0.75 ? "large" : s.ranks.size <= 0.25 ? "small" : "medium";
   const winWord = s.ranks.win >= 0.75 ? "above-average" : s.ranks.win <= 0.25 ? "below-average" : "mixed";
   const pptWord = s.ranks.ppt >= 0.75 ? "strong" : s.ranks.ppt <= 0.25 ? "weak" : "mixed";
-  const tiltWord = s.ranks.odds >= 0.75 ? "leans longshots" : s.ranks.odds <= 0.25 ? "leans favorites" : "mixed odds";
+  const tiltWord = s.ranks.odds >= 0.75 ? "leans longshots" : "mixed odds";
 
   const pretty = `${activityWord} activity, ${sizeWord} trades, ${tiltWord}; win rate ${winWord} with ${pptWord} profit per trade.`;
 
@@ -383,7 +391,8 @@ function parseRow(d) {
     total_volume: [Math.log(+d.total_trade_volume), Math.log(+d.total_trade_volume_ignore_sales)],
     total_number: [Math.log(+d.total_trade_number), Math.log(+d.total_trade_number_ignore_sales)],
     frequency: [Math.log(+d.frequency), Math.log(+d.frequency_ignore_sales)],
-    net_gain: [Math.log(+d.net_gains_loss), Math.log(+d.net_gains_loss_ignore_sales)],
+  // Net gains/loss can be negative, so keep raw values and apply a transform at render-time.
+  net_gain: [+d.net_gains_loss, +d.net_gains_loss_ignore_sales],
     avg_odds: [+d.avg_odds, +d.avg_odds_ignore_sales],
     profit_per_trade: [+d.profit_per_trade, +d.profit_per_trade_ignore_sales],
     category: [category, category],
@@ -465,6 +474,10 @@ function filterAndDownsample() {
   return keep.concat(sampled);
 }
 
+function fieldUsesAsinh(field) {
+  return field === "net_gains" || field === "profit_per_trade";
+}
+
 function sampleDeterministic(arr, k, seed) {
   // Fisher-Yates shuffle with LCG RNG, then take first k.
   const a = arr.slice();
@@ -509,6 +522,8 @@ function buildScales() {
     if (field === "tsne_1" || field === "tsne_2") return false;
   // Avg odds is naturally bounded (0–1-ish), so log scaling isn't helpful.
   if (field === "avg_odds") return false;
+  // If we're using an asinh transform (to keep negatives), don't use log.
+  if (fieldUsesAsinh(field)) return false;
     const xs = values.filter((v) => Number.isFinite(v));
     if (!xs.length) return false;
     const minV = d3.min(xs);
@@ -520,11 +535,19 @@ function buildScales() {
     return Number.isFinite(ratio) && ratio >= LOG_RATIO_THRESHOLD;
   };
 
+  const getAxisValues = (field, idx) => {
+    const vals = raw.map((d) => getValue(d, field, idx)).filter((v) => Number.isFinite(v));
+    // Apply transform only for the chosen axis fields.
+    if (fieldUsesAsinh(field)) return vals.map((v) => asinh(v));
+    return vals;
+  };
+
   if (isNumericField(xField)) {
-    const xs = raw.map((d) => getValue(d, xField, idx)).filter((v) => Number.isFinite(v));
+  xIsAsinh = fieldUsesAsinh(xField);
+  const xs = getAxisValues(xField, idx);
     const xMin = d3.min(xs) ?? 0;
     const xMax = d3.max(xs) ?? 1;
-    xIsLog = shouldUseLogScale(xField, xs);
+  xIsLog = shouldUseLogScale(xField, xs);
     if (xIsLog) {
       xScale = d3
         .scaleLog()
@@ -541,6 +564,7 @@ function buildScales() {
   } else {
     // x is categorical. Use all categories so axis doesn't jump when filtering.
     xIsLog = false;
+  xIsAsinh = false;
     xScale = d3
       .scalePoint()
       .domain(categoriesAll)
@@ -549,7 +573,8 @@ function buildScales() {
   }
 
   if (isNumericField(yField)) {
-    const ys = raw.map((d) => getValue(d, yField, idx)).filter((v) => Number.isFinite(v));
+  yIsAsinh = fieldUsesAsinh(yField);
+  const ys = getAxisValues(yField, idx);
     const yMin = d3.min(ys) ?? 0;
     const yMax = d3.max(ys) ?? 1;
     yIsLog = shouldUseLogScale(yField, ys);
@@ -626,7 +651,7 @@ function renderAxes() {
     .attr("y", height - 5)
     .attr("text-anchor", "middle")
     .attr("fill", "#cbd5e1")
-  .text(`${prettyAxisLabel(xField)}${xIsLog ? " (log)" : ""}`);
+  .text(`${prettyAxisLabel(xField)}${xIsAsinh ? " (asinh)" : (xIsLog ? " (log)" : "")}`);
 
   svg
     .append("text")
@@ -635,7 +660,7 @@ function renderAxes() {
     .attr("y", 15)
     .attr("text-anchor", "middle")
     .attr("fill", "#cbd5e1")
-  .text(`${prettyAxisLabel(yField)}${yIsLog ? " (log)" : ""}`);
+  .text(`${prettyAxisLabel(yField)}${yIsAsinh ? " (asinh)" : (yIsLog ? " (log)" : "")}`);
 }
 
 function renderPoints() {
@@ -711,8 +736,12 @@ function renderPoints() {
   // Render
   for (let i = 0; i < df.length; i++) {
     const d = df[i];
-    const x = xScale(getValue(d, xField, idx));
-    const y = yScale(getValue(d, yField, idx));
+  const xv0 = getValue(d, xField, idx);
+  const yv0 = getValue(d, yField, idx);
+  const xv = xIsAsinh ? asinh(xv0) : xv0;
+  const yv = yIsAsinh ? asinh(yv0) : yv0;
+  const x = xScale(xv);
+  const y = yScale(yv);
     if (!Number.isFinite(x) || !Number.isFinite(y)) continue;
 
     const r = rScale(d.total_volume[idx]);
