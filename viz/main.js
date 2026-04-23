@@ -444,10 +444,12 @@ function parseRow(d) {
     total_volume: [Math.log(+d.total_trade_volume), Math.log(+d.total_trade_volume_ignore_sales)],
     total_number: [Math.log(+d.total_trade_number), Math.log(+d.total_trade_number_ignore_sales)],
     frequency: [Math.log(+d.frequency), Math.log(+d.frequency_ignore_sales)],
-  // Net gains/loss can be negative, so keep raw values and apply a transform at render-time.
-  net_gain: [+d.net_gains_loss, +d.net_gains_loss_ignore_sales],
+  // Net gains/loss and profit-per-trade are inverted in the source export; flip signs here so
+  // positive means profit and negative means loss.
+  // (These fields can be negative, so keep raw values and apply a transform at render-time.)
+  net_gain: [-+d.net_gains_loss, -+d.net_gains_loss_ignore_sales],
     avg_odds: [+d.avg_odds, +d.avg_odds_ignore_sales],
-    profit_per_trade: [+d.profit_per_trade, +d.profit_per_trade_ignore_sales],
+  profit_per_trade: [-+d.profit_per_trade, -+d.profit_per_trade_ignore_sales],
     category: [category, category],
     // Keep raw one-hot flags so filtering can be done exactly on them.
     category_flags: {
