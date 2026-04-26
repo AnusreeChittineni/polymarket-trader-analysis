@@ -184,7 +184,7 @@ function buildKMeansLegendStats() {
 
   // Manual overrides for specific cluster labels to match the narrative.
   if (s.cluster === 3) name = "Bonders";
-  if (s.cluster === 5) name = "Mixed";
+  if (s.cluster === 6) name = "Mixed";
   if (s.cluster === 1) name = "Average Traders";
   if (s.cluster === 4) name = "Slightly Richer Average Traders";
 
@@ -197,7 +197,7 @@ function buildKMeansLegendStats() {
     ? "takes trades with safe odds"
     : (s.ranks.odds >= 0.75 ? "leans longshots" : "mixed odds");
 
-  const pretty = s.cluster === 5
+  const pretty = s.cluster === 6
     ? "few trades, unusually high win rate, and high volume."
     : s.cluster === 1
       ? "medium traders taking smallish trades with average profits."
@@ -303,9 +303,10 @@ function renderLegend() {
   }
 
   const stats = buildKMeansLegendStats();
+  const visibleStats = stats.filter((s) => s.name !== "Mixed");
   const mode = els.includeSales.checked ? "including sales" : "excluding sales";
 
-  const rows = stats
+  const rows = visibleStats
     .map((s) => {
   const color = getClusterColor(s.cluster);
       return `
