@@ -173,7 +173,7 @@ function buildKMeansLegendStats() {
 
   // Friendly, stable-ish archetype name derived from cluster medians.
   // (Heuristic, but more readable than "Cluster N".)
-  let name = "Mixed";
+  let name = "Good Traders";
   if (s.ranks.size >= 0.85 && s.ranks.trades >= 0.65) name = "Whales";
   else if (s.ranks.trades >= 0.85 && s.ranks.size <= 0.45) name = "Grinders";
   else if (s.ranks.trades <= 0.25 && s.ranks.size <= 0.35) name = "Gamblers";
@@ -184,7 +184,7 @@ function buildKMeansLegendStats() {
 
   // Manual overrides for specific cluster labels to match the narrative.
   if (s.cluster === 3) name = "Bonders";
-  if (s.cluster === 5) name = "Suspiciously Good Traders";
+  if (s.cluster === 5) name = "Mixed";
   if (s.cluster === 1) name = "Average Traders";
   if (s.cluster === 4) name = "Slightly Richer Average Traders";
 
