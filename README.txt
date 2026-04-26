@@ -4,7 +4,7 @@ DESCRIPTION:
 
 The Polymarket Trader Analysis package is a comprehensive toolkit designed to analyze and visualize trader behavior on decentralized prediction markets. The system processes high-volume raw transaction data to identify patterns in user activity across diverse sectors such as Crypto, Politics, and Sports.
 
-The package utilizes a multi-stage pipeline: data ingestion and transformation via DuckDB, k-means clustering to segment trader profiles based on volume and frequency, and an interactive D3.js visualization platform. The final visualization allows users to explore these trader clusters and their performance metrics in a web-based environment.
+The package utilizes a multi-stage pipeline: data ingestion and transformation via DuckDB, k-means clustering to segment trader profiles based on patterns in behavior and outcomes, and an interactive D3.js visualization platform. The final visualization allows users to explore these trader clusters and their performance metrics in a web-based environment.
 
 INSTALLATION:
 
