@@ -28,17 +28,7 @@ function getClusterColor(label) {
     const idx = ((label % DBSCAN_MAX_COLORS) + DBSCAN_MAX_COLORS) % DBSCAN_MAX_COLORS;
     return dbscanClusterColor(idx);
   }
-  // Keep KMeans colors tied to the original cluster identities,
-  // even though display labels 5 and 6 are remapped.
-  const colorLabel = mapKMeansClusterLabel(label);
-  return kmeansClusterColor(colorLabel);
-}
-
-function mapKMeansClusterLabel(label) {
-  // helper to remove cluster 5 from sidebar since it only has 3 traders
-  if (label === 5) return 6;
-  if (label === 6) return 5;
-  return label;
+  return kmeansClusterColor(label);
 }
 
 const els = {
@@ -103,12 +93,21 @@ function median(arr) {
 }
 
 function buildKMeansLegendStats() {
+  const CLUSTER_DESCS = [
+    ["Gamblers", "primarily trades low odds, with lower win rates"],
+    ["Avg. Traders 1", "typical trading behavior"],
+    ["Grinders", "notably high trade counts"],
+    ["Avg. Traders 2", "typical trading behavior"],
+    ["Rich Avg. Traders 1", "typical trading behavior, high volume per trade"],
+    ["Rich Avg. Traders 2", "typical trading behavior, high volume per trade"],
+    ["Exceptionally Bad Traders", "outlier cluster containing two traders with millions in losses"],
+  ]
   // Use the same include/exclude sales mode as the plot.
   const idx = els.includeSales.checked ? 0 : 1;
 
   const by = new Map();
   for (const d of raw) {
-    const c = mapKMeansClusterLabel(d.kmeans?.[idx]);
+    const c = d.kmeans?.[idx];
     if (!Number.isFinite(c)) continue;
     if (!by.has(c)) by.set(c, []);
     by.get(c).push(d);
@@ -162,67 +161,16 @@ function buildKMeansLegendStats() {
       odds: rOdds(s.odds),
     };
 
-    // Heuristic archetype naming.
-    const tags = [];
-    if (s.ranks.win >= 0.8) tags.push("high win-rate");
-    else if (s.ranks.win <= 0.2) tags.push("low win-rate");
+    const name = CLUSTER_DESCS[s.cluster][0];
+    const pretty = CLUSTER_DESCS[s.cluster][1];
 
-    if (s.ranks.trades >= 0.8) tags.push("very active");
-    else if (s.ranks.trades <= 0.2) tags.push("low activity");
+    const subtitle = name;
 
-    if (s.ranks.size >= 0.8) tags.push("large trades");
-    else if (s.ranks.size <= 0.2) tags.push("small trades");
-
-  if (s.ranks.odds >= 0.8) tags.push("longshot-leaning");
-
-    if (s.ranks.ppt >= 0.8) tags.push("profitable per trade");
-    else if (s.ranks.ppt <= 0.2) tags.push("unprofitable per trade");
-
-  // Make a short 2–3 tag title.
-  const title = tags.slice(0, 3).join(" · ") || "mixed";
-
-  // Friendly, stable-ish archetype name derived from cluster medians.
-  // (Heuristic, but more readable than "Cluster N".)
-  let name = "Good Traders";
-  if (s.ranks.size >= 0.85 && s.ranks.trades >= 0.65) name = "Whales";
-  else if (s.ranks.trades >= 0.85 && s.ranks.size <= 0.45) name = "Grinders";
-  else if (s.ranks.trades <= 0.25 && s.ranks.size <= 0.35) name = "Gamblers";
-  else if (s.ranks.win >= 0.80 && s.ranks.ppt >= 0.65) name = "Good Traders";
-  else if (s.ranks.win <= 0.20 && s.ranks.ppt <= 0.35) name = "Bad Traders";
-  else if (s.ranks.odds >= 0.85) name = "Longshot Bettors";
-  else if (s.ranks.odds <= 0.15) name = "Favorites Bettors";
-
-  // Manual overrides for specific cluster labels to match the narrative.
-  if (s.cluster === 3) name = "Bonders";
-  if (s.cluster === 6) name = "Mixed";
-  if (s.cluster === 1) name = "Average Traders";
-  if (s.cluster === 4) name = "Slightly Richer Average Traders";
-
-  // Clearer, sentence-like characterization.
-  const activityWord = s.ranks.trades >= 0.75 ? "high" : s.ranks.trades <= 0.25 ? "low" : "moderate";
-  const sizeWord = s.ranks.size >= 0.75 ? "large" : s.ranks.size <= 0.25 ? "small" : "medium";
-  const winWord = s.ranks.win >= 0.75 ? "above-average" : s.ranks.win <= 0.25 ? "below-average" : "mixed";
-  const pptWord = s.ranks.ppt >= 0.75 ? "strong" : s.ranks.ppt <= 0.25 ? "weak" : "mixed";
-  const tiltWord = s.cluster === 3
-    ? "takes trades with safe odds"
-    : (s.ranks.odds >= 0.75 ? "leans longshots" : "mixed odds");
-
-  const pretty = s.cluster === 6
-    ? "few trades, unusually high win rate, and high volume."
-    : s.cluster === 1
-      ? "medium traders taking smallish trades with average profits."
-      : s.cluster === 4
-        ? "medium traders with slightly more spending money on medium sized trades."
-        : `${activityWord} activity, ${sizeWord} trades, ${tiltWord}; win rate ${winWord} with ${pptWord} profit per trade.`;
-
-  // Use tags as a short subtitle in the legend.
-  const subtitle = title;
-
-  s.name = name;
-  s.pretty = pretty;
-  s.title = `${name} (Cluster ${s.cluster})`;
-  s.subtitle = subtitle;
-  s.desc = `Traders: ${fmt(s.n)} · ${pretty}  Win rate: ${Number.isFinite(s.win) ? fmt(s.win, 3) : ""} · Trades/trader (median): ~${fmt(s.trades, 0)} · Avg size: ~${fmt(s.avgSize, 1)} · Profit/trade: ~${Number.isFinite(s.ppt) ? fmt(s.ppt, 3) : ""}`;
+    s.name = name;
+    s.pretty = pretty;
+    s.title = `${name} (Cluster ${s.cluster})`;
+    s.subtitle = subtitle;
+    s.desc = `Traders: ${fmt(s.n)} · ${pretty} · Win rate: ${Number.isFinite(s.win) ? fmt(s.win, 3) : ""} · Trades/trader (median): ~${fmt(s.trades, 0)} · Avg size: ~${fmt(s.avgSize, 1)} · Profit/trade: ~${Number.isFinite(s.ppt) ? fmt(s.ppt, 3) : ""} · Avg odds: ${Number.isFinite(s.odds) ? fmt(s.odds, 3) : ""}`;
   }
 
   return stats;
@@ -313,10 +261,9 @@ function renderLegend() {
   }
 
   const stats = buildKMeansLegendStats();
-  const visibleStats = stats.filter((s) => s.name !== "Mixed");
   const mode = els.includeSales.checked ? "including sales" : "excluding sales";
 
-  const rows = visibleStats
+  const rows = stats
     .map((s) => {
   const color = getClusterColor(s.cluster);
       return `
@@ -367,7 +314,7 @@ function getClusterMethod() {
 function getClusterLabel(d, idx) {
   const method = getClusterMethod();
   if (method === "dbscan") return d.dbscan[idx];
-  return mapKMeansClusterLabel(d.kmeans[idx]);
+  return d.kmeans[idx];
 }
 
 function getXAxisField() {
@@ -455,12 +402,9 @@ function parseRow(d) {
     total_volume: [Math.log(+d.total_trade_volume), Math.log(+d.total_trade_volume_ignore_sales)],
     total_number: [Math.log(+d.total_trade_number), Math.log(+d.total_trade_number_ignore_sales)],
     frequency: [Math.log(+d.frequency), Math.log(+d.frequency_ignore_sales)],
-  // Net gains/loss and profit-per-trade are inverted in the source export; flip signs here so
-  // positive means profit and negative means loss.
-  // (These fields can be negative, so keep raw values and apply a transform at render-time.)
-  net_gain: [-+d.net_gains_loss, -+d.net_gains_loss_ignore_sales],
+  net_gain: [+d.net_gains_loss, +d.net_gains_loss_ignore_sales],
     avg_odds: [+d.avg_odds, +d.avg_odds_ignore_sales],
-  profit_per_trade: [-+d.profit_per_trade, -+d.profit_per_trade_ignore_sales],
+  profit_per_trade: [+d.profit_per_trade, +d.profit_per_trade_ignore_sales],
     category: [category, category],
     // Keep raw one-hot flags so filtering can be done exactly on them.
     category_flags: {

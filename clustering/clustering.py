@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import hdbscan
 
-df = pd.read_csv("/home/hice1/achakraborty75/scratch/dva/samples/updated_trader_stats.csv")
+df = pd.read_csv("../samples/updated_trader_stats.csv")
 
 # win_rate_ignore_sales,avg_trade_size_ignore_sales,total_trade_volume_ignore_sales,total_trade_number_ignore_sales,frequency_ignore_sales,net_gains_loss_ignore_sales,avg_odds_ignore_sales,profit_per_trade_ignore_sales
 
