@@ -94,13 +94,13 @@ function median(arr) {
 
 function buildKMeansLegendStats() {
   const CLUSTER_DESCS = [
-    ["NAME 1", "DESC 1"],
-    ["NAME 2", "DESC 2"],
-    ["NAME 3", "DESC 3"],
-    ["NAME 4", "DESC 4"],
-    ["NAME 5", "DESC 5"],
-    ["NAME 6", "DESC 6"],
-    ["NAME 7", "DESC 7"],
+    ["Gamblers", "primarily trades low odds, with lower win rates"],
+    ["Avg. Traders 1", "typical trading behavior"],
+    ["Grinders", "notably high trade counts"],
+    ["Avg. Traders 2", "typical trading behavior"],
+    ["Rich Avg. Traders 1", "typical trading behavior, high volume per trade"],
+    ["Rich Avg. Traders 2", "typical trading behavior, high volume per trade"],
+    ["Exceptionally Bad Traders", "outlier cluster containing two traders with millions in losses"],
   ]
   // Use the same include/exclude sales mode as the plot.
   const idx = els.includeSales.checked ? 0 : 1;
@@ -170,7 +170,7 @@ function buildKMeansLegendStats() {
     s.pretty = pretty;
     s.title = `${name} (Cluster ${s.cluster})`;
     s.subtitle = subtitle;
-    s.desc = `Traders: ${fmt(s.n)} · ${pretty}  Win rate: ${Number.isFinite(s.win) ? fmt(s.win, 3) : ""} · Trades/trader (median): ~${fmt(s.trades, 0)} · Avg size: ~${fmt(s.avgSize, 1)} · Profit/trade: ~${Number.isFinite(s.ppt) ? fmt(s.ppt, 3) : ""}`;
+    s.desc = `Traders: ${fmt(s.n)} · ${pretty} · Win rate: ${Number.isFinite(s.win) ? fmt(s.win, 3) : ""} · Trades/trader (median): ~${fmt(s.trades, 0)} · Avg size: ~${fmt(s.avgSize, 1)} · Profit/trade: ~${Number.isFinite(s.ppt) ? fmt(s.ppt, 3) : ""} · Avg odds: ${Number.isFinite(s.odds) ? fmt(s.odds, 3) : ""}`;
   }
 
   return stats;
@@ -402,12 +402,9 @@ function parseRow(d) {
     total_volume: [Math.log(+d.total_trade_volume), Math.log(+d.total_trade_volume_ignore_sales)],
     total_number: [Math.log(+d.total_trade_number), Math.log(+d.total_trade_number_ignore_sales)],
     frequency: [Math.log(+d.frequency), Math.log(+d.frequency_ignore_sales)],
-  // Net gains/loss and profit-per-trade are inverted in the source export; flip signs here so
-  // positive means profit and negative means loss.
-  // (These fields can be negative, so keep raw values and apply a transform at render-time.)
-  net_gain: [-+d.net_gains_loss, -+d.net_gains_loss_ignore_sales],
+  net_gain: [+d.net_gains_loss, +d.net_gains_loss_ignore_sales],
     avg_odds: [+d.avg_odds, +d.avg_odds_ignore_sales],
-  profit_per_trade: [-+d.profit_per_trade, -+d.profit_per_trade_ignore_sales],
+  profit_per_trade: [+d.profit_per_trade, +d.profit_per_trade_ignore_sales],
     category: [category, category],
     // Keep raw one-hot flags so filtering can be done exactly on them.
     category_flags: {
