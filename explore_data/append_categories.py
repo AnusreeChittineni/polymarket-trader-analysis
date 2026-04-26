@@ -24,7 +24,6 @@ def run_transformation():
         SELECT 
             unnest(from_json(CAST(clob_token_ids AS JSON), '["VARCHAR"]')) AS token_id,
             question,
-            condition_id,
             market_maker_address,
             CASE 
                 WHEN question ILIKE '%crypto%' OR question ILIKE '%bitcoin%' THEN 'Crypto'
@@ -35,47 +34,50 @@ def run_transformation():
                 ELSE 'Other/Misc'
             END AS category
         FROM read_parquet('{POLY_MARKETS_GLOB}')
-        WHERE clob_token_ids IS NOT NULL AND clob_token_ids != '[]'
     """)
 
-    query = con.execute(f"""
-        SELECT 
-            t.transaction_hash,
-            t.maker,
-            t.taker_asset_id,
-            m.question,
-            m.market_maker_address,
-            m.clob_token_ids
-        FROM read_parquet('{SAMPLES_PATH}') t
-        JOIN read_parquet('{POLY_MARKETS_GLOB}') m
-            ON (
-                -- Check if the asset ID exists within the market's token list string
-                m.clob_token_ids LIKE '%' || t.taker_asset_id || '%'
-                OR 
-                m.clob_token_ids LIKE '%' || t.maker_asset_id || '%'
-            )
-        LIMIT 10
-    """).df()
+    trader_stats_path = str(SCRIPT_DIR.parent / "create_subset" / "trader_stats.csv").replace("\\", "/")
 
-    print("Sample joined data:")
-    print(query.head())
+    con.execute(f"CREATE OR REPLACE TABLE existing_stats AS SELECT * FROM read_csv_auto('{trader_stats_path}')")
 
-    print("Step 2: Joining categories to samples...")
-    # We join on market_maker_address (common identifier in PolyMarket data)
+    cols = con.execute("PRAGMA table_info('existing_stats')").df()['name'].tolist()
+    has_primary_cat = 'primary_category' in cols
+
+    # 3. Setup the column names for the query
+    history_col = "s.primary_category" if has_primary_cat else "NULL"
+    exclude_clause = "EXCLUDE (primary_category)" if has_primary_cat else ""
+
     final_query = f"""
+        WITH joined_data AS (
+            SELECT 
+                t.*,
+                -- Check taker_asset_id first, then maker_asset_id
+                COALESCE(m_taker.category, m_maker.category) AS cat_by_token,
+                {history_col} AS cat_by_history
+            FROM read_parquet('{SAMPLES_PATH}') t
+            -- Join on Taker Asset
+            LEFT JOIN markets_expanded m_taker 
+                ON LOWER(CAST(t.taker_asset_id AS VARCHAR)) = LOWER(CAST(m_taker.token_id AS VARCHAR))
+            -- Join on Maker Asset (Backup)
+            LEFT JOIN markets_expanded m_maker 
+                ON LOWER(CAST(t.maker_asset_id AS VARCHAR)) = LOWER(CAST(m_maker.token_id AS VARCHAR))
+            -- Join on Trader History
+            LEFT JOIN existing_stats s 
+                ON LOWER(CAST(t.maker AS VARCHAR)) = LOWER(CAST(s.trader AS VARCHAR))
+        )
         SELECT 
-            t.*, 
-            m.category,
-            m.question
-        FROM read_parquet('{SAMPLES_PATH}') t
-        INNER JOIN markets_expanded m 
-            ON CAST(t.taker_asset_id AS VARCHAR) = CAST(m.token_id AS VARCHAR)
+            *,
+            -- PRIORITY: 
+            -- 1. Category found via Asset ID match
+            -- 2. Category found via historical Trader ID match
+            -- 3. Default to Other/Misc
+            COALESCE(cat_by_token, cat_by_history, 'Other/Misc') AS category
+        FROM joined_data
     """
-    
-    # Execute and fetch to a dataframe
-    df_final = con.execute(final_query).df()
 
-    print("Step 4: Creating updated_trader_stats.csv...")
+    print("Step 2: Creating updated_trader_stats.csv...")
+
+    print(con.execute(f"SELECT * FROM read_parquet('{SAMPLES_PATH}') LIMIT 0").df().columns)
     
     # 1. First, identify the "Primary Category" for each trader based on trade frequency
     con.execute(f"""
@@ -97,31 +99,24 @@ def run_transformation():
 
     # 2. Join this category onto your existing trader_stats.csv
     # We use read_csv_auto to pull in the existing stats you already have
-    trader_stats_path = str(SCRIPT_DIR.parent / "samples" / "trader_stats.csv").replace("\\", "/")
     
+    exclude_clause = "EXCLUDE (primary_category)" if has_primary_cat else ""
+
     con.execute(f"""
-        CREATE OR REPLACE TABLE updated_stats AS
+        CREATE OR REPLACE TABLE final_stats AS
         SELECT 
-            m.primary_category,
-            s.*
-        FROM read_csv_auto('{trader_stats_path}') s
+            -- This line ensures if the mapping found nothing, it becomes 'Other/Misc'
+            COALESCE(m.primary_category, 'Other/Misc') AS primary_category,
+            s.* {exclude_clause} 
+        FROM existing_stats s
         LEFT JOIN trader_category_mapping m ON s.trader = m.trader
     """)
 
     # 3. Export the final result
     UPDATED_STATS_OUTPUT = str(SCRIPT_DIR.parent / "samples" / "updated_trader_stats.csv").replace("\\", "/")
-    con.execute(f"COPY updated_stats TO '{UPDATED_STATS_OUTPUT}' (HEADER, DELIMITER ',')")
+    con.execute(f"COPY final_stats TO '{UPDATED_STATS_OUTPUT}' (HEADER, DELIMITER ',')")
 
     print(f"Successfully created: {UPDATED_STATS_OUTPUT}")
-
-    print("Step 3: Exporting files...")
-    # Export to Parquet
-    df_final.to_parquet(OUTPUT_PARQUET, index=False)
-    
-    # Export to CSV
-    df_final.to_csv(OUTPUT_CSV, index=False)
-
-    print(f"Done! Created {OUTPUT_PARQUET} and {OUTPUT_CSV}")
 
 if __name__ == "__main__":
     run_transformation()
