@@ -26,11 +26,11 @@ def run_transformation():
             question,
             market_maker_address,
             CASE 
-                WHEN question ILIKE '%crypto%' OR question ILIKE '%bitcoin%' THEN 'Crypto'
-                WHEN question ILIKE '%election%' OR question ILIKE '%trump%' OR question ILIKE '%biden%' THEN 'Politics'
-                WHEN question ILIKE '%nfl%' OR question ILIKE '%nba%' THEN 'Sports'
-                WHEN question ILIKE '%fed%' OR question ILIKE '%rate%' THEN 'Economics'
-                WHEN question ILIKE '%Kardashian%' OR question ILIKE '%Kanye%' THEN 'Pop Culture'
+                WHEN question ILIKE '%crypto%' OR question ILIKE '%bitcoin%' OR question ILIKE '%eth%' OR question ILIKE '%solana%' THEN 'Crypto'
+                WHEN question ILIKE '%US%' OR question ILIKE '%election%' OR question ILIKE '%trump%' OR question ILIKE '%poll%' OR question ILIKE '%biden%' OR question ILIKE '%harris%' OR question ILIKE '%netanyahu%' THEN 'Politics'
+                WHEN question ILIKE '%arsenal%' OR question ILIKE '%goals%' OR question ILIKE '%nhl%' OR question ILIKE '%nfl%' OR question ILIKE '%nba%' OR question ILIKE '%mlb%' OR question ILIKE '%championship%' OR question ILIKE '%win%' OR question ILIKE '%close%' OR question ILIKE '%points%' OR question ILIKE '%lose%' THEN 'Sports'
+                WHEN question ILIKE '%fed%' OR question ILIKE '%rate%' OR question ILIKE '%inflation%' OR question ILIKE '%recession%' or question ILIKE '%$%' THEN 'Economics'
+                WHEN question ILIKE '%oscars%' OR question ILIKE '%grammys%' OR question ILIKE '%movie%' or question ILIKE '%album%' or question ILIKE '%music%' or question ILIKE '%netflix%' or question ILIKE '%divorce%' or question ILIKE '%Zendaya%'  or question ILIKE '%Coachella%' or question ILIKE '%sstreams%' or question ILIKE '%Kardashian%' THEN 'Pop Culture'
                 ELSE 'Other/Misc'
             END AS category
         FROM read_parquet('{POLY_MARKETS_GLOB}')
