@@ -410,10 +410,16 @@ function parseRow(d) {
     category_flags: {
       Crypto: asBool(d.category_Crypto),
       Economics: asBool(d.category_Economics),
-      "Other/Misc": asBool(d.category_Other_Misc),
       Politics: asBool(d.category_Politics),
       "Pop Culture": asBool(d.category_Pop_Culture),
       Sports: asBool(d.category_Sports),
+      "Other/Misc": asBool(d.category_Other_Misc) || (
+        !asBool(d.category_Crypto) &&
+        !asBool(d.category_Economics) &&
+        !asBool(d.category_Politics) &&
+        !asBool(d.category_Pop_Culture) &&
+        !asBool(d.category_Sports)
+      )
     },
     tsne_1: [+d.tsne_1, +d.tsne_1],
     tsne_2: [+d.tsne_2, +d.tsne_2],
