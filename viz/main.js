@@ -386,7 +386,7 @@ function parseRow(d) {
   // d3.csv returns strings by default; normalize booleans safely.
   const asBool = (v) => v === true || v === "True" || v === "true" || v === 1 || v === "1";
 
-  let category = "Pop Culture";
+  let category = "Other/Misc";
   if (asBool(d.category_Crypto)) category = "Crypto";
   else if (asBool(d.category_Economics)) category = "Economics";
   else if (asBool(d.category_Other_Misc)) category = "Other/Misc";
