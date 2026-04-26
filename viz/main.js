@@ -28,7 +28,17 @@ function getClusterColor(label) {
     const idx = ((label % DBSCAN_MAX_COLORS) + DBSCAN_MAX_COLORS) % DBSCAN_MAX_COLORS;
     return dbscanClusterColor(idx);
   }
-  return kmeansClusterColor(label);
+  // Keep KMeans colors tied to the original cluster identities,
+  // even though display labels 5 and 6 are remapped.
+  const colorLabel = mapKMeansClusterLabel(label);
+  return kmeansClusterColor(colorLabel);
+}
+
+function mapKMeansClusterLabel(label) {
+  // helper to remove cluster 5 from sidebar since it only has 3 traders
+  if (label === 5) return 6;
+  if (label === 6) return 5;
+  return label;
 }
 
 const els = {
@@ -98,7 +108,7 @@ function buildKMeansLegendStats() {
 
   const by = new Map();
   for (const d of raw) {
-    const c = d.kmeans?.[idx];
+    const c = mapKMeansClusterLabel(d.kmeans?.[idx]);
     if (!Number.isFinite(c)) continue;
     if (!by.has(c)) by.set(c, []);
     by.get(c).push(d);
@@ -357,7 +367,7 @@ function getClusterMethod() {
 function getClusterLabel(d, idx) {
   const method = getClusterMethod();
   if (method === "dbscan") return d.dbscan[idx];
-  return d.kmeans[idx];
+  return mapKMeansClusterLabel(d.kmeans[idx]);
 }
 
 function getXAxisField() {
