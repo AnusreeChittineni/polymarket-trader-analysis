@@ -21,8 +21,11 @@ For local hosting -
 - Visit the site: http://localhost:8000/viz/
 
 For remote hosting -
-- In your github repository settings you can deploy a github pages url through github actions
-    - Be sure to move clustered_traders.csv to the viz folder
+- If using the original repository...
+    - Visit the site: https://anusreechittineni.com/polymarket-trader-analysis/ 
+- If using a fork...
+    - In your github repository settings you can deploy a github pages url through github actions
+        - Be sure to move clustered_traders.csv to the viz folder
 
 FROM SCRATCH REPLICATION:
 
