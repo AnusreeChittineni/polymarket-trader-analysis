@@ -95,11 +95,11 @@ function median(arr) {
 function buildKMeansLegendStats() {
   const CLUSTER_DESCS = [
     ["Gamblers", "primarily trades low odds, with lower win rates"],
-    ["Avg. Traders 1", "typical trading behavior"],
+    ["Avg. Traders", "typical trading behavior"],
     ["Grinders", "notably high trade counts"],
-    ["Avg. Traders 2", "typical trading behavior"],
+    ["Good Traders", "notably higher than average win rates"],
     ["Rich Avg. Traders 1", "typical trading behavior, high volume per trade"],
-    ["Rich Avg. Traders 2", "typical trading behavior, high volume per trade"],
+    ["Rich Avg. Traders 2", "typical trading behavior, high volume per trade with higher trade frequency"],
     ["Exceptionally Bad Traders", "outlier cluster containing two traders with millions in losses"],
   ]
   // Use the same include/exclude sales mode as the plot.
